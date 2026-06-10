@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Srinivasan. S - Professional Portfolio. Python Full Stack Developer specializing in Django, Python, MySQL, and Web Integration, with a strong aspiration in DevOps & Cloud Automation.">
+    <meta name="keywords" content="Srinivasan, Python Full Stack, Django, Developer, AWS, Jenkins, Docker, CI/CD, Coimbatore, Portfolio">
+    <meta name="author" content="Srinivasan. S">
+    <title>Srinivasan. S | Python Full Stack Developer Portfolio</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    
+    <!-- Open Graph Metadata -->
+    <meta property="og:title" content="Srinivasan. S | Python Full Stack Developer Portfolio">
+    <meta property="og:description" content="Srinivasan. S - Professional Portfolio. Python Full Stack Developer specializing in Django, Python, MySQL, and Web Integration.">
+    <meta property="og:image" content="assets/logo.png">
+    <meta property="og:type" content="website">
+    
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- FontAwesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="loading-active">
+
+    <!-- Terminal Preloader -->
+    <div class="portfolio-preloader" id="preloader">
+        <div class="loader-terminal">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                </div>
+                <div class="terminal-title">bash - build_portfolio.sh</div>
+                <div style="width: 36px;"></div>
+            </div>
+            <div class="terminal-body">
+                <div class="terminal-console" id="consoleOutput">
+                    <!-- Simulated build logs will append here -->
+                </div>
+                <div class="loader-progress-area">
+                    <div class="progress-status">
+                        <span id="loaderStatus">Initializing build script...</span>
+                        <span id="loaderPercent">0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ambient Top Glow, Liquid Blobs and Custom Cursor -->
+    <div class="top-glow"></div>
+    <div class="liquid-blob-1"></div>
+    <div class="liquid-blob-2"></div>
+    <div class="cursor-jm">
+        <div class="icon-jm-cursor">&lt;/&gt;</div>
+        <div class="text-jm-cursor">view</div>
+    </div>
+
+    <!-- Navigation Header (Capsule Layout) -->
+    <div class="container-2">
+        <div class="cont-name-logo">
+            <a class="nav-name" href="#home">
+                <img src="assets/logo.png" alt="CodeWithSrini Logo" class="nav-logo-img">
+                <div class="nav-name-jm">SRINIVASAN. S</div>
+            </a>
+        </div>
+        <ul class="nav-menu">
+            <a class="nav-link active" href="#home">Home</a>
+            <a class="nav-link" href="#about">About</a>
+            <i class="fa-solid fa-code" style="color: var(--primary); margin: 0 0.25rem; font-size: 0.9rem; opacity: 0.8;"></i>
+            <a class="nav-link" href="#projects">Work</a>
+            <a class="nav-link" href="#contact">Contact</a>
+        </ul>
+        <ol class="nav-social-wrapper">
+            <a class="nav-social-link" href="mailto:srinivasan.sriraman2346@gmail.com">Email</a>
+            <a class="nav-social-link" href="https://www.linkedin.com/in/srinivasan-s-0784282a9/" target="_blank">LinkedIn</a>
+            <a class="nav-social-link" href="https://github.com/SrinivasanS23" target="_blank">GitHub</a>
+        </ol>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <div class="hero-tagline">
+                    <i class="fa-solid fa-code"></i> Python Full Stack Developer
+                </div>
+                <h1 class="hero-title">
+                    Hi, I'm <span>Srinivasan. S</span>
+                </h1>
+                <h2 class="hero-subtitle">
+                    I Am <span class="typed-text">Web Applications</span><span class="typed-cursor">|</span>
+                </h2>
+                <p class="hero-desc">
+                    I'm Srinivasan, a passionate developer specializing in Python, Django, and modern web technologies. With hands-on experience in full-stack development and a growing interest in DevOps and cloud computing, I enjoy building scalable applications and solving real-world problems through technology. I'm constantly learning, creating, and exploring new ways to turn ideas into impactful digital solutions.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#projects">
+                        Explore My Work <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <a class="btn btn-secondary" href="#contact">
+                        Get In Touch <i class="fa-solid fa-paper-plane"></i>
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-num">5<span>+</span></span>
+                        <span class="stat-label">Projects Built</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-num">8.35<span> CGPA</span></span>
+                        <span class="stat-label">BCA Academy</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-num">3<span>+</span></span>
+                        <span class="stat-label">Credentials</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-visual">
+                <div class="hero-visual-card">
+                    <img src="assets/sri_avatar.jpg" alt="Srinivasan. S Portrait">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Typographic Statement Divider -->
+    <div class="click-scroll-height">
+        <h2 class="click-scroll-text">Developing robust backends & automating cloud <span>environments</span></h2>
+    </div>
+
+    <!-- About Me Section -->
+    <section class="section" id="about">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Introduction</span>
+                <h2 class="section-title">About Me</h2>
+                <div class="section-divider"></div>
+            </div>
+            
+            <div class="about-grid">
+                <div class="about-cards-container">
+                    <!-- Profile headshot photo inside About Me -->
+                    <div class="glass-card profile-pic-card reveal">
+                        <img src="assets/sri_portrait.jpg" alt="Srinivasan. S Portrait">
+                    </div>
+                    <div class="glass-card about-stat-card reveal">
+                        <i class="fa-solid fa-code"></i>
+                        <h3>Full Stack Dev</h3>
+                        <p>Django backend services, MySQL database logic, & responsive UI integration.</p>
+                    </div>
+                    <div class="glass-card about-stat-card secondary reveal">
+                        <i class="fa-solid fa-infinity"></i>
+                        <h3>DevOps Learner</h3>
+                        <p>Configuring AWS networks, Docker container builds, & setup of CI/CD automation.</p>
+                    </div>
+                </div>
+                
+                <div class="about-details reveal">
+                    <h3 class="about-title">Building scalable web solutions and learning cloud ecosystems.</h3>
+                    <p class="about-text">
+                        I am a dedicated Python Full Stack Developer and aspiring DevOps engineer who graduated in BCA - DevOps & Automation from Coimbatore, Tamil Nadu. My primary focus is on developing robust web backends, managing database security, and writing clean backend services.
+                    </p>
+                    <p class="about-text">
+                        I believe in strong coding foundations and continuous deployment. By combining solid Python frameworks (Django, Flask) with core containerization (Docker) and AWS cloud solutions, I aim to create highly available, scalable application stacks.
+                    </p>
+                    
+                    <div class="about-info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Current Location</span>
+                            <span class="info-val">Coimbatore, Tamil Nadu, India</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Email Address</span>
+                            <span class="info-val"><a href="mailto:srinivasan.sriraman2346@gmail.com">srinivasan.sriraman2346@gmail.com</a></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Education Status</span>
+                            <span class="info-val">BCA Graduated (2023 - 2026)</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">GitHub Account</span>
+                            <span class="info-val"><a href="https://github.com/SrinivasanS23" target="_blank">github.com/SrinivasanS23</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Skills Section -->
+    <section class="section" id="skills">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Excellence</span>
+                <h2 class="section-title">Technical Skills</h2>
+                <div class="section-divider"></div>
+            </div>
+            
+            <div class="skills-grid">
+                <!-- Category 1: Cloud & DevOps -->
+                <div class="glass-card skills-category reveal">
+                    <div class="skills-cat-header">
+                        <i class="fa-solid fa-cloud"></i>
+                        <h3 class="skills-cat-title">Cloud & DevOps</h3>
+                    </div>
+                    <div class="skills-list">
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">AWS (VPC, EC2, S3, IAM)</span>
+                                <span class="skill-percentage">85%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="85"></div>
+                            </div>
+                        </div>
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">GitHub Actions & Jenkins</span>
+                                <span class="skill-percentage">80%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="80"></div>
+                            </div>
+                        </div>
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">Docker Containers</span>
+                                <span class="skill-percentage">75%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="75"></div>
+                            </div>
+                        </div>
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">Git & GitHub Workflows</span>
+                                <span class="skill-percentage">90%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="90"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category 2: OS & Scripting -->
+                <div class="glass-card skills-category reveal">
+                    <div class="skills-cat-header">
+                        <i class="fa-solid fa-terminal"></i>
+                        <h3 class="skills-cat-title">OS & Scripting</h3>
+                    </div>
+                    <div class="skills-list">
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">Linux Systems & Security</span>
+                                <span class="skill-percentage">85%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="85"></div>
+                            </div>
+                        </div>
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">Bash Shell Scripting</span>
+                                <span class="skill-percentage">80%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="80"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category 3: Programming & Web -->
+                <div class="glass-card skills-category reveal">
+                    <div class="skills-cat-header">
+                        <i class="fa-solid fa-code"></i>
+                        <h3 class="skills-cat-title">Development</h3>
+                    </div>
+                    <div class="skills-list">
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">Python Programming</span>
+                                <span class="skill-percentage">80%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="80"></div>
+                            </div>
+                        </div>
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">Django Framework</span>
+                                <span class="skill-percentage">75%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="75"></div>
+                            </div>
+                        </div>
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">HTML5 & CSS3 Styling</span>
+                                <span class="skill-percentage">85%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="85"></div>
+                            </div>
+                        </div>
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">JavaScript & Web Fundamentals</span>
+                                <span class="skill-percentage">70%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="70"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category 4: Databases -->
+                <div class="glass-card skills-category reveal">
+                    <div class="skills-cat-header">
+                        <i class="fa-solid fa-database"></i>
+                        <h3 class="skills-cat-title">Databases</h3>
+                    </div>
+                    <div class="skills-list">
+                        <div class="skill-bar-wrapper">
+                            <div class="skill-info">
+                                <span class="skill-name">MySQL Query Design</span>
+                                <span class="skill-percentage">75%</span>
+                            </div>
+                            <div class="skill-bar-bg">
+                                <div class="skill-bar-fill" data-percent="75"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Timeline Section -->
+    <section class="section" id="experience">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Professional</span>
+                <h2 class="section-title">Internship Experience</h2>
+                <div class="section-divider"></div>
+            </div>
+            
+            <div class="experience-grid">
+                <div class="experience-timeline">
+                    <!-- Internship 1 -->
+                    <div class="timeline-item reveal">
+                        <div class="timeline-dot"></div>
+                        <div class="glass-card timeline-card">
+                            <div class="timeline-header">
+                                <div>
+                                    <h3 class="timeline-role">Python Full-Stack Developer Intern</h3>
+                                    <span class="timeline-company">Pumo Technovation Pvt Ltd</span>
+                                </div>
+                                <span class="timeline-date">
+                                    <i class="fa-regular fa-calendar-days"></i> 2024 (Internship)
+                                </span>
+                            </div>
+                            <ul class="timeline-desc">
+                                <li>Assisted in deploying complex Django-based web applications on AWS EC2 & S3 infrastructure.</li>
+                                <li>Supported Linux-based server setup, user management permissions, system services configuration, and troubleshooting.</li>
+                                <li>Applied Git and GitHub workflows for collaborative codebase management and branches version control.</li>
+                                <li>Integrated automated tests and gained experience setting up CI/CD pipeline triggers.</li>
+                                <li>Participated proactively in the agile software development and release delivery lifecycles.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="experience-visual reveal">
+                    <div class="glass-card experience-img-card">
+                        <img src="assets/sri_speaking.jpg" alt="Srinivasan. S Presentation / Speaking">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Grid Section -->
+    <section class="section" id="projects">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Showcase</span>
+                <h2 class="section-title">Featured Projects</h2>
+                <div class="section-divider"></div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="projects-filter reveal">
+                <button class="filter-btn active" data-filter="all">All Projects</button>
+                <button class="filter-btn" data-filter="devops">DevOps & Cloud</button>
+                <button class="filter-btn" data-filter="web">Full-Stack & Web</button>
+            </div>
+            
+            <div class="projects-grid">
+                <!-- Project 1: SKiI RAYS -->
+                <div class="project-card-wrapper reveal" data-category="web">
+                    <div class="glass-card project-card">
+                        <div class="project-image-wrapper">
+                            <img src="assets/ski_rays_preview.png" alt="Ski Rays Heaven City Preview">
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-tags">
+                                <span class="project-tag">HTML5 & CSS3</span>
+                                <span class="project-tag">JavaScript</span>
+                                <span class="project-tag cloud">AWS S3 Hosting</span>
+                            </div>
+                            <h3 class="project-title">SKiI RAYS - Heaven City Kodaikanal</h3>
+                            <p class="project-desc">
+                                Created and launched the official website for Ski Rays Homes Private Limited. Demonstrates responsive visual layouts, custom styling configurations, showcasing premium flat communities and luxury villas in Kodaikanal.
+                            </p>
+                            <div class="project-links">
+                                <a class="project-link" href="https://ski-rays.vercel.app/" target="_blank">
+                                    <i class="fa-solid fa-earth-americas"></i> Live Demo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2: SRI MAKEOVERS -->
+                <div class="project-card-wrapper reveal" data-category="web">
+                    <div class="glass-card project-card">
+                        <div class="project-image-wrapper">
+                            <img src="assets/sri_makeovers_preview.png" alt="Sri Makeovers Salon Preview">
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-tags">
+                                <span class="project-tag">HTML5 & CSS3</span>
+                                <span class="project-tag">Bootstrap 5</span>
+                                <span class="project-tag">Responsive UI</span>
+                            </div>
+                            <h3 class="project-title">Sri Makeovers Studio</h3>
+                            <p class="project-desc">
+                                Built the official responsive client interface for Sri Makeovers bridal makeup artistry. Showcases salon services, client galleries, testimonials, and integrates direct contact click-to-book channels.
+                            </p>
+                            <div class="project-links">
+                                <a class="project-link" href="https://srimakeovers.vercel.app" target="_blank">
+                                    <i class="fa-solid fa-earth-americas"></i> Live Demo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 3: Secure Web Server VPC -->
+                <div class="project-card-wrapper reveal" data-category="devops">
+                    <div class="glass-card project-card">
+                        <div class="project-image-wrapper">
+                            <img src="assets/cloud_devops_bg.png" alt="Secure AWS VPC Web Server">
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-tags">
+                                <span class="project-tag cloud">AWS VPC</span>
+                                <span class="project-tag cloud">AWS EC2</span>
+                                <span class="project-tag devops">Nginx</span>
+                            </div>
+                            <h3 class="project-title">Secure Web Server on AWS VPC</h3>
+                            <p class="project-desc">
+                                Configured a secure, high-availability Nginx/Apache web server architecture on AWS. Structured custom public/private subnets, NAT Gateways, Security Groups, and Network ACL filters.
+                            </p>
+                            <div class="project-links">
+                                <a class="project-link" href="https://github.com/SrinivasanS23" target="_blank">
+                                    <i class="fa-brands fa-github"></i> Repository
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Project 5: AI-Based Complaint Classifier -->
+                <div class="project-card-wrapper reveal" data-category="devops">
+                    <div class="glass-card project-card">
+                        <div class="project-image-wrapper">
+                            <img src="assets/cloud_devops_bg.png" alt="AI Complaint Classification System">
+                        </div>
+                        <div class="project-card-content">
+                            <div class="project-tags">
+                                <span class="project-tag">Python & Django</span>
+                                <span class="project-tag">Machine Learning</span>
+                                <span class="project-tag devops">GitHub Actions CI</span>
+                            </div>
+                            <h3 class="project-title">AI Complaint Classification System</h3>
+                            <p class="project-desc">
+                                Developed an NLP complaint classifier integrated with a Django web interface. Integrated automation testing pipelines with GitHub Actions CI workflows.
+                            </p>
+                            <div class="project-links">
+                                <a class="project-link" href="https://github.com/SrinivasanS23" target="_blank">
+                                    <i class="fa-brands fa-github"></i> Repository
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certifications & Education Section -->
+    <section class="section" id="certifications">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Credentials</span>
+                <h2 class="section-title">Certifications & Education</h2>
+                <div class="section-divider"></div>
+            </div>
+            
+            <!-- Certifications Grid -->
+            <div class="certifications-grid">
+                <!-- Cert 1 -->
+                <div class="glass-card cert-card reveal">
+                    <div class="cert-icon">
+                        <i class="fa-solid fa-medal"></i>
+                    </div>
+                    <div class="cert-info">
+                        <h3 class="cert-name">Certified Python Full-Stack Developer</h3>
+                        <span class="cert-provider">Pumo Technovation Pvt Ltd</span>
+                        <span class="cert-date">2024</span>
+                    </div>
+                </div>
+                
+                <!-- Cert 2 -->
+                <div class="glass-card cert-card reveal">
+                    <div class="cert-icon">
+                        <i class="fa-solid fa-infinity"></i>
+                    </div>
+                    <div class="cert-info">
+                        <h3 class="cert-name">Intensified DevOps Training Program</h3>
+                        <span class="cert-provider">MVIII Tech (OPC) Pvt. Ltd.</span>
+                        <span class="cert-date">Completed</span>
+                    </div>
+                </div>
+                
+                <!-- Cert 3 -->
+                <div class="glass-card cert-card reveal">
+                    <div class="cert-icon">
+                        <i class="fa-solid fa-terminal"></i>
+                    </div>
+                    <div class="cert-info">
+                        <h3 class="cert-name">Bash Scripting & Shell Automation</h3>
+                        <span class="cert-provider">Udemy Certification</span>
+                        <span class="cert-date">Credentials Earned</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Education Grid -->
+            <div class="education-grid">
+                <!-- Degree 1 -->
+                <div class="glass-card edu-card reveal">
+                    <h3 class="edu-degree">BCA - DevOps & Automation</h3>
+                    <span class="edu-college">Rathinam College of Arts & Science, Coimbatore</span>
+                    <div class="edu-meta">
+                        <span class="edu-duration"><i class="fa-regular fa-calendar-days"></i> 2023 - 2026 (Graduated)</span>
+                        <span class="edu-score">CGPA: <span>8.35</span></span>
+                    </div>
+                    <p class="about-text">
+                        Focused coursework: Operating Systems Administration, Container Orchestration, Cloud Architecture, Automation Scripting, Web Tech stacks.
+                    </p>
+                </div>
+                
+                <!-- Degree 2 -->
+                <div class="glass-card edu-card reveal">
+                    <h3 class="edu-degree">HSC (Higher Secondary)</h3>
+                    <span class="edu-college">PSG Sarvajana Hr.Sec.School, Coimbatore</span>
+                    <div class="edu-meta">
+                        <span class="edu-duration"><i class="fa-regular fa-calendar-days"></i> Graduated 2023</span>
+                        <span class="edu-score">Score: <span>92.1%</span></span>
+                    </div>
+                    <p class="about-text">
+                        Academic background in core sciences and computing algorithms. Achieved excellent score reflecting consistency and strong learning capabilities.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section" id="contact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Reach Out</span>
+                <h2 class="section-title">Contact Me</h2>
+                <div class="section-divider"></div>
+            </div>
+            
+            <div class="contact-grid">
+                <!-- Info details -->
+                <div class="contact-info reveal">
+                    <div>
+                        <h3 class="contact-info-title">Let's connect and discuss clouds.</h3>
+                        <p class="contact-info-desc">
+                            Are you seeking an enthusiastic entry-level DevOps / Cloud engineer to boost your deployment velocity? Drop a message here, email me, or ping me on WhatsApp.
+                        </p>
+                    </div>
+                    
+                    <div class="contact-methods">
+                        <div class="contact-method-card">
+                            <div class="contact-method-icon">
+                                <i class="fa-regular fa-envelope"></i>
+                            </div>
+                            <div class="contact-method-details">
+                                <span class="contact-method-label">Write Email</span>
+                                <span class="contact-method-value"><a href="mailto:srinivasan.sriraman2346@gmail.com">srinivasan.sriraman2346@gmail.com</a></span>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method-card secondary">
+                            <div class="contact-method-icon">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div class="contact-method-details">
+                                <span class="contact-method-label">Call Direct</span>
+                                <span class="contact-method-value"><a href="tel:+918870798720">+91 88707 98720</a></span>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method-card accent">
+                            <div class="contact-method-icon">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div class="contact-method-details">
+                                <span class="contact-method-label">Find Me</span>
+                                <span class="contact-method-value">Coimbatore, Tamil Nadu, India</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="social-links">
+                        <a class="social-btn" href="https://github.com/SrinivasanS23" target="_blank"><i class="fa-brands fa-github"></i></a>
+                        <a class="social-btn" href="https://www.linkedin.com/in/srinivasan-s-0784282a9/" target="_blank"><i class="fa-brands fa-linkedin-in"></i></a>
+                        <a class="social-btn" href="https://www.instagram.com/srinivasan.sriraman23/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                        <a class="social-btn" href="https://wa.me/918870798720" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Contact Form Card -->
+                <div class="glass-card reveal">
+                    <form class="contact-form" id="portfolioContactForm">
+                        <div class="form-group">
+                            <label class="form-label" for="contactName">Name *</label>
+                            <input class="form-input" id="contactName" type="text" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="contactEmail">Email Address *</label>
+                            <input class="form-input" id="contactEmail" type="email" placeholder="john@example.com" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label" for="contactSubject">Subject</label>
+                            <input class="form-input" id="contactSubject" type="text" placeholder="Job Opportunity / Project Collaboration">
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label" for="contactMessage">Message *</label>
+                            <textarea class="form-input" id="contactMessage" placeholder="Hello Srinivasan, I would like to discuss..." required></textarea>
+                        </div>
+                        
+                        <div class="form-feedback" id="formFeedback"></div>
+                        
+                        <button class="btn btn-primary form-btn" type="submit">
+                            Send Message <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <span class="footer-logo">SRINIVASAN. S</span>
+            <span class="footer-copy">
+                &copy; 2026 Srinivasan. S. Built with passion. All rights reserved.
+            </span>
+        </div>
+    </footer>
+
+    <!-- Scripts JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
