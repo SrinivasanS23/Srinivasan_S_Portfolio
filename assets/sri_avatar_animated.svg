@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Definitions for gradients and drop shadows -->
+  <defs>
+    <!-- Soft Drop Shadow for cards/laptop -->
+    <filter id="drop-shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="2" dy="5" stdDeviation="6" flood-color="#8c6239" flood-opacity="0.15" />
+    </filter>
+    
+    <!-- Warm skin tones -->
+    <linearGradient id="skin-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5d6c4" />
+      <stop offset="100%" stop-color="#e0b59b" />
+    </linearGradient>
+
+    <!-- Hair gradient -->
+    <linearGradient id="hair-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3d322a" />
+      <stop offset="100%" stop-color="#1c1612" />
+    </linearGradient>
+
+    <!-- Sweater terracotta gradient -->
+    <linearGradient id="sweater-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8754b" />
+      <stop offset="100%" stop-color="#734a29" />
+    </linearGradient>
+
+    <!-- Laptop metallic gray -->
+    <linearGradient id="laptop-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8c827a" />
+      <stop offset="100%" stop-color="#544d47" />
+    </linearGradient>
+
+    <!-- Screen light glow -->
+    <linearGradient id="screen-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#f7f2e8" stop-opacity="0.3" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Warm Circle Backdrop -->
+  <circle cx="250" cy="240" r="190" fill="#f4edd8" opacity="0.7" />
+  <circle cx="250" cy="240" r="175" fill="none" stroke="#af8a56" stroke-width="2" stroke-dasharray="8 6" opacity="0.4" />
+
+  <!-- Window Frame in Background -->
+  <path d="M 330 100 L 400 100 L 400 220 L 330 220 Z" fill="#faf6ee" opacity="0.6" />
+  <line x1="365" y1="100" x2="365" y2="220" stroke="#af8a56" stroke-width="1.5" opacity="0.3" />
+  <line x1="330" y1="160" x2="400" y2="160" stroke="#af8a56" stroke-width="1.5" opacity="0.3" />
+
+  <!-- Desk Plant -->
+  <g transform="translate(370, 260)">
+    <!-- Pot -->
+    <path d="M 5 60 L 35 60 L 30 90 L 10 90 Z" fill="#d9c2b0" stroke="#8c6239" stroke-width="1.5" />
+    <rect x="2" y="55" width="36" height="6" rx="2" fill="#c4aa95" stroke="#8c6239" stroke-width="1.5" />
+    <!-- Succulent Leaves -->
+    <path d="M 20 55 C 20 35, 10 30, 8 20 C 15 25, 20 40, 20 55 Z" fill="#8c6239" opacity="0.9" />
+    <path d="M 20 55 C 20 30, 30 25, 32 15 C 25 20, 20 38, 20 55 Z" fill="#af8a56" />
+    <path d="M 12 55 C 5 40, 2 42, -5 35 C 2 48, 12 52, 12 55 Z" fill="#734a29" />
+    <path d="M 28 55 C 35 40, 38 42, 45 35 C 38 48, 28 52, 28 55 Z" fill="#a8754b" />
+  </g>
+
+  <!-- Coffee Mug -->
+  <g transform="translate(75, 335)">
+    <!-- Steam Curls -->
+    <path d="M 15 -10 C 12 -18, 18 -22, 15 -30" fill="none" stroke="#af8a56" stroke-width="2" stroke-linecap="round" opacity="0.5" />
+    <path d="M 25 -12 C 22 -20, 28 -24, 25 -32" fill="none" stroke="#af8a56" stroke-width="2" stroke-linecap="round" opacity="0.5" />
+    <!-- Mug Body -->
+    <rect x="5" y="0" width="30" height="40" rx="4" fill="#8c6239" filter="url(#drop-shadow)" />
+    <!-- Mug Handle -->
+    <path d="M 5 8 C -5 8, -5 32, 5 32" fill="none" stroke="#8c6239" stroke-width="4.5" stroke-linecap="round" />
+    <path d="M 5 8 C -5 8, -5 32, 5 32" fill="none" stroke="#faf6ee" stroke-width="1.5" stroke-linecap="round" opacity="0.2" />
+  </g>
+
+  <!-- Main Desk Surface -->
+  <rect x="30" y="370" width="440" height="15" rx="6" fill="#d9cbb6" stroke="#8c6239" stroke-width="2" filter="url(#drop-shadow)" />
+  <rect x="40" y="385" width="420" height="120" fill="#faf6ee" stroke="#8c6239" stroke-width="2" opacity="0.1" />
+
+  <!-- DEVELOPER CHARACTER -->
+  <g id="character">
+    <!-- Torso / Sweater -->
+    <path d="M 150 370 C 150 280, 270 280, 270 370 Z" fill="url(#sweater-grad)" stroke="#543821" stroke-width="2" />
+    <!-- Collar -->
+    <path d="M 185 300 C 195 312, 225 312, 235 300 C 225 295, 195 295, 185 300 Z" fill="#543821" />
+
+    <!-- Neck -->
+    <rect x="200" y="275" width="20" height="30" rx="3" fill="url(#skin-grad)" stroke="#8c6239" stroke-width="1.5" />
+    <path d="M 200 290 C 210 298, 210 298, 220 290" fill="none" stroke="#70472b" stroke-width="1" opacity="0.4" />
+
+    <!-- Head / Face -->
+    <circle cx="210" cy="240" r="38" fill="url(#skin-grad)" stroke="#8c6239" stroke-width="2" />
+
+    <!-- Ears -->
+    <circle cx="170" cy="242" r="7" fill="url(#skin-grad)" stroke="#8c6239" stroke-width="1.5" />
+    <circle cx="250" cy="242" r="7" fill="url(#skin-grad)" stroke="#8c6239" stroke-width="1.5" />
+
+    <!-- Hair -->
+    <path d="M 172 230 C 168 200, 180 185, 210 185 C 240 185, 252 200, 248 230 C 255 220, 252 195, 240 190 C 235 180, 220 178, 210 178 C 200 178, 185 180, 180 190 C 168 195, 165 220, 172 230 Z" fill="url(#hair-grad)" stroke="#1c1612" stroke-width="1.5" />
+    <path d="M 172 225 C 172 210, 180 200, 195 195" fill="none" stroke="#54473d" stroke-width="2" stroke-linecap="round" opacity="0.3" />
+
+    <!-- Sleek Glasses -->
+    <!-- Left Frame -->
+    <circle cx="194" cy="238" r="11" fill="none" stroke="#543821" stroke-width="2" />
+    <circle cx="194" cy="238" r="10" fill="none" stroke="#af8a56" stroke-width="1" opacity="0.8" />
+    <!-- Right Frame -->
+    <circle cx="226" cy="238" r="11" fill="none" stroke="#543821" stroke-width="2" />
+    <circle cx="226" cy="238" r="10" fill="none" stroke="#af8a56" stroke-width="1" opacity="0.8" />
+    <!-- Glasses Bridge -->
+    <path d="M 205 238 L 215 238" stroke="#543821" stroke-width="2.5" />
+    <!-- Glasses Sides -->
+    <path d="M 183 238 L 172 235" stroke="#543821" stroke-width="2" />
+    <path d="M 237 238 L 248 235" stroke="#543821" stroke-width="2" />
+
+    <!-- Eyes (behind glasses) -->
+    <circle cx="194" cy="238" r="2.5" fill="#1c1612" />
+    <circle cx="226" cy="238" r="2.5" fill="#1c1612" />
+    <path d="M 190 224 Q 194 221 198 224" fill="none" stroke="#1c1612" stroke-width="1.5" stroke-linecap="round" />
+    <path d="M 222 224 Q 226 221 230 224" fill="none" stroke="#1c1612" stroke-width="1.5" stroke-linecap="round" />
+
+    <!-- Nose -->
+    <path d="M 210 234 L 208 245 L 212 245" fill="none" stroke="#8c6239" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Cheerful Smile -->
+    <path d="M 200 255 Q 210 264 220 255" fill="none" stroke="#70472b" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Right Arm / Hand (Typing on Laptop) -->
+    <g id="right-arm">
+      <path d="M 245 330 C 265 340, 275 350, 290 365 C 285 370, 275 370, 255 358 C 245 350, 240 340, 245 330 Z" fill="url(#sweater-grad)" stroke="#543821" stroke-width="1.5" />
+      <circle cx="290" cy="365" r="7.5" fill="url(#skin-grad)" stroke="#8c6239" stroke-width="1.5" />
+    </g>
+
+    <!-- LEFT ARM & HAND (WAVING ANIMATION TARGET) -->
+    <!-- Pivot Center at Shoulder: (172, 325) -->
+    <g id="waving-arm" style="transform-origin: 172px 325px;">
+      <!-- Shoulder connection to Hand -->
+      <path d="M 172 325 C 145 315, 130 290, 132 250 C 140 248, 150 255, 152 280 C 153 295, 162 315, 172 325 Z" fill="url(#sweater-grad)" stroke="#543821" stroke-width="1.5" />
+      <!-- Waving Hand -->
+      <g transform="translate(132, 245)">
+        <!-- Palm -->
+        <circle cx="0" cy="0" r="10" fill="url(#skin-grad)" stroke="#8c6239" stroke-width="1.5" />
+        <!-- Fingers -->
+        <!-- Thumb -->
+        <path d="M 8 -2 C 14 -2, 14 4, 8 4" fill="none" stroke="#8c6239" stroke-width="2.5" stroke-linecap="round" />
+        <!-- Index -->
+        <path d="M 4 -8 C 6 -16, 0 -16, -2 -8" fill="none" stroke="#8c6239" stroke-width="2.5" stroke-linecap="round" />
+        <!-- Middle -->
+        <path d="M 0 -9 C 2 -18, -4 -18, -6 -9" fill="none" stroke="#8c6239" stroke-width="2.5" stroke-linecap="round" />
+        <!-- Ring -->
+        <path d="M -4 -8 C -2 -16, -8 -16, -10 -8" fill="none" stroke="#8c6239" stroke-width="2.5" stroke-linecap="round" />
+        <!-- Little -->
+        <path d="M -8 -6 C -7 -12, -12 -12, -13 -6" fill="none" stroke="#8c6239" stroke-width="2.5" stroke-linecap="round" />
+      </g>
+    </g>
+  </g>
+
+  <!-- MODERN LAPTOP -->
+  <g id="laptop" filter="url(#drop-shadow)" transform="translate(265, 305)">
+    <!-- Screen Light Projection Glow -->
+    <path d="M 28 65 L -45 5 L -10 5 L 34 65 Z" fill="url(#screen-glow)" opacity="0.3" />
+    
+    <!-- Opened Screen Bezel -->
+    <path d="M 28 65 L 5 2 C 3 0, 0 0, -2 2 L -20 30 C -22 33, -20 36, -17 38 Z" fill="#423d38" stroke="#8c6239" stroke-width="1.5" />
+    <path d="M 26 63 L 6 4 C 5 3, 3 3, 2 5 L -18 32 C -19 34, -18 36, -16 37 Z" fill="#24211f" />
+    
+    <!-- Screen Content (Glowing Golden/Bronze Code) -->
+    <path d="M 23 60 L 8 10 C 8 8, 7 8, 6 9 L -14 34 L -10 53 Z" fill="#302a25" />
+    <!-- Glowing Code Lines -->
+    <line x1="18" y1="50" x2="10" y2="30" stroke="#af8a56" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
+    <line x1="14" y1="42" x2="6" y2="22" stroke="#d9c2b0" stroke-width="1.5" stroke-linecap="round" opacity="0.9" />
+    <line x1="8" y1="28" x2="3" y2="18" stroke="#8c6239" stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+    <line x1="10" y1="55" x2="4" y2="40" stroke="#af8a56" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
+
+    <!-- Laptop Base/Keyboard -->
+    <path d="M 18 67 L 78 67 L 72 73 C 71 74, 69 75, 67 75 L 7 75 C 5 75, 3 74, 2 73 Z" fill="url(#laptop-grad)" stroke="#3a3430" stroke-width="1.5" />
+    <!-- Keyboard Area -->
+    <path d="M 21 68 L 72 68 L 68 72 L 17 72 Z" fill="#1c1815" />
+    <!-- Trackpad -->
+    <path d="M 40 73 L 50 73 L 49 74 L 41 74 Z" fill="#7d736a" />
+  </g>
+
+</svg>

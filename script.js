@@ -53,12 +53,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(addConsoleLine, msg.delay);
                 });
             } else {
-                setTimeout(() => {
-                    preloader.style.opacity = '0';
-                    preloader.style.visibility = 'hidden';
-                    document.body.classList.remove('loading-active');
-                    document.body.classList.add('hero-animate');
-                }, 300);
+                // Show and enable the Get Started button when loading is complete
+                const getStartedBtn = document.getElementById('getStartedBtn');
+                if (getStartedBtn) {
+                    getStartedBtn.disabled = false;
+                    getStartedBtn.style.opacity = '1';
+                    getStartedBtn.style.pointerEvents = 'auto';
+                    getStartedBtn.style.transform = 'scale(1)';
+                    getStartedBtn.classList.add('btn-pulse-glow');
+                    
+                    getStartedBtn.addEventListener('click', () => {
+                        preloader.style.opacity = '0';
+                        preloader.style.visibility = 'hidden';
+                        document.body.classList.remove('loading-active');
+                        document.body.classList.add('hero-animate');
+                    });
+                } else {
+                    // Fallback in case the button is missing from HTML
+                    setTimeout(() => {
+                        preloader.style.opacity = '0';
+                        preloader.style.visibility = 'hidden';
+                        document.body.classList.remove('loading-active');
+                        document.body.classList.add('hero-animate');
+                    }, 300);
+                }
             }
         }
 
@@ -88,19 +106,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navbar) {
         window.addEventListener('scroll', () => {
             if (window.scrollY > 50) {
-                navbar.style.background = 'rgba(10, 10, 20, 0.75)';
+                navbar.style.background = 'rgba(10, 10, 10, 0.9)';
                 navbar.style.paddingTop = '0.5rem';
                 navbar.style.paddingBottom = '0.5rem';
                 navbar.style.marginTop = '0.75rem';
                 navbar.style.width = '95%';
-                navbar.style.boxShadow = '0 20px 45px rgba(0, 0, 0, 0.6)';
+                navbar.style.boxShadow = '0 20px 45px rgba(0, 0, 0, 0.5)';
             } else {
-                navbar.style.background = 'rgba(10, 10, 20, 0.4)';
+                navbar.style.background = 'rgba(10, 10, 10, 0.45)';
                 navbar.style.paddingTop = '';
                 navbar.style.paddingBottom = '';
                 navbar.style.marginTop = '1.5rem';
                 navbar.style.width = '90%';
-                navbar.style.boxShadow = '0 15px 40px rgba(0, 0, 0, 0.5)';
+                navbar.style.boxShadow = '0 15px 40px rgba(0, 0, 0, 0.3)';
             }
         });
     }
@@ -322,21 +340,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Simulating API loading state
+            // Simulating loading state and WhatsApp redirection
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Sending...';
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Redirecting...';
             formFeedback.style.display = 'none';
 
-            // Simulate server network delay
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const subject = subjectInput.value.trim() || 'General Inquiry';
+            const message = messageInput.value.trim();
+
+            // Format message for WhatsApp click-to-chat
+            const formattedMsg = `💼 *NEW SERVICE REQUEST*\n` +
+                                 `━━━━━━━━━━━━━━━━━━━━\n` +
+                                 `👤 *Name:* ${name}\n` +
+                                 `📧 *Email:* ${email}\n` +
+                                 `🎯 *Subject:* ${subject}\n` +
+                                 `📝 *Message:* ${message}`;
+
+            const encodedMsg = encodeURIComponent(formattedMsg);
+            const whatsappUrl = `https://wa.me/918870798720?text=${encodedMsg}`;
+
+            // Redirect with a slight user feedback delay
             setTimeout(() => {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnText;
 
-                // Success response
-                showFeedback('Thank you, ' + nameInput.value.trim() + '! Your message was successfully sent.', 'success');
+                // Open WhatsApp message link in a new tab
+                window.open(whatsappUrl, '_blank');
+
+                // Show success feedback
+                showFeedback('Redirecting to WhatsApp to send your request. Thank you!', 'success');
                 contactForm.reset();
-            }, 1500);
+            }, 800);
         });
     }
 

@@ -49,6 +49,11 @@
                     <div class="progress-bar-container">
                         <div class="progress-bar-fill" id="progressBarFill"></div>
                     </div>
+                    <div class="loader-action-area" style="text-align: center; margin-top: 1.5rem; display: flex; justify-content: center;">
+                        <button id="getStartedBtn" class="btn btn-primary" style="opacity: 0.3; pointer-events: none; transform: scale(0.95); transition: all 0.4s ease;" disabled>
+                            Get Started <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -127,7 +132,184 @@
             
             <div class="hero-visual">
                 <div class="hero-visual-card">
-                    <img src="assets/sri_avatar.jpg" alt="Srinivasan. S Portrait">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%" class="animated-avatar-svg">
+                      <!-- Definitions for gradients and drop shadows -->
+                      <defs>
+                        <!-- Soft Drop Shadow for cards/laptop -->
+                        <filter id="drop-shadow" x="-10%" y="-10%" width="130%" height="130%">
+                          <feDropShadow dx="2" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.2" />
+                        </filter>
+                        
+                        <!-- Warm skin tones -->
+                        <linearGradient id="skin-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#f5d6c4" />
+                          <stop offset="100%" stop-color="#e0b59b" />
+                        </linearGradient>
+
+                        <!-- Hair gradient -->
+                        <linearGradient id="hair-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#3d322a" />
+                          <stop offset="100%" stop-color="#1c1612" />
+                        </linearGradient>
+
+                        <!-- Sweater electric blue gradient -->
+                        <linearGradient id="sweater-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#6B7A3D" />
+                          <stop offset="100%" stop-color="#4F5D2F" />
+                        </linearGradient>
+
+                        <!-- Laptop metallic gray -->
+                        <linearGradient id="laptop-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#8c827a" />
+                          <stop offset="100%" stop-color="#544d47" />
+                        </linearGradient>
+
+                        <!-- Screen light glow -->
+                        <linearGradient id="screen-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
+                          <stop offset="100%" stop-color="#6B7A3D" stop-opacity="0.2" />
+                        </linearGradient>
+                      </defs>
+
+                      <!-- Background Warm Circle Backdrop -->
+                      <circle cx="250" cy="240" r="190" fill="rgba(23, 23, 23, 0.8)" opacity="0.6" />
+                      <circle cx="250" cy="240" r="175" fill="none" stroke="#6B7A3D" stroke-width="2" stroke-dasharray="8 6" opacity="0.3" />
+
+                      <!-- Window Frame in Background -->
+                      <path d="M 330 100 L 400 100 L 400 220 L 330 220 Z" fill="rgba(23, 23, 23, 0.8)" opacity="0.3" />
+                      <line x1="365" y1="100" x2="365" y2="220" stroke="#2A2A2A" stroke-width="1.5" opacity="0.3" />
+                      <line x1="330" y1="160" x2="400" y2="160" stroke="#2A2A2A" stroke-width="1.5" opacity="0.3" />
+
+                      <!-- Desk Plant -->
+                      <g transform="translate(370, 260)">
+                        <!-- Pot -->
+                        <path d="M 5 60 L 35 60 L 30 90 L 10 90 Z" fill="#E5E5EA" stroke="#86868B" stroke-width="1.5" />
+                        <rect x="2" y="55" width="36" height="6" rx="2" fill="#D2D2D7" stroke="#86868B" stroke-width="1.5" />
+                        <!-- Succulent Leaves -->
+                        <path d="M 20 55 C 20 35, 10 30, 8 20 C 15 25, 20 40, 20 55 Z" fill="#34C759" opacity="0.9" />
+                        <path d="M 20 55 C 20 30, 30 25, 32 15 C 25 20, 20 38, 20 55 Z" fill="#30b04b" />
+                        <path d="M 12 55 C 5 40, 2 42, -5 35 C 2 48, 12 52, 12 55 Z" fill="#1e9e34" />
+                        <path d="M 28 55 C 35 40, 38 42, 45 35 C 38 48, 28 52, 28 55 Z" fill="#28CD41" />
+                      </g>
+
+                      <!-- Coffee Mug -->
+                      <g transform="translate(75, 335)">
+                        <!-- Steam Curls -->
+                        <path d="M 15 -10 C 12 -18, 18 -22, 15 -30" fill="none" stroke="#6B7A3D" stroke-width="2" stroke-linecap="round" opacity="0.5" />
+                        <path d="M 25 -12 C 22 -20, 28 -24, 25 -32" fill="none" stroke="#6B7A3D" stroke-width="2" stroke-linecap="round" opacity="0.5" />
+                        <!-- Mug Body -->
+                        <rect x="5" y="0" width="30" height="40" rx="4" fill="#6B7A3D" filter="url(#drop-shadow)" />
+                        <!-- Mug Handle -->
+                        <path d="M 5 8 C -5 8, -5 32, 5 32" fill="none" stroke="#6B7A3D" stroke-width="4.5" stroke-linecap="round" />
+                        <path d="M 5 8 C -5 8, -5 32, 5 32" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.2" />
+                      </g>
+
+                      <!-- Main Desk Surface -->
+                      <rect x="30" y="370" width="440" height="15" rx="6" fill="rgba(23, 23, 23, 0.8)" stroke="#2A2A2A" stroke-width="2" filter="url(#drop-shadow)" />
+                      <rect x="40" y="385" width="420" height="120" fill="#0A0A0A" stroke="#2A2A2A" stroke-width="2" opacity="0.25" />
+
+                      <!-- DEVELOPER CHARACTER -->
+                      <g id="character">
+                        <!-- Torso / Sweater -->
+                        <path d="M 150 370 C 150 280, 270 280, 270 370 Z" fill="url(#sweater-grad)" stroke="#4F5D2F" stroke-width="2" />
+                        <!-- Collar -->
+                        <path d="M 185 300 C 195 312, 225 312, 235 300 C 225 295, 195 295, 185 300 Z" fill="#4F5D2F" />
+
+                        <!-- Neck -->
+                        <rect x="200" y="275" width="20" height="30" rx="3" fill="url(#skin-grad)" stroke="#d4a387" stroke-width="1.5" />
+                        <path d="M 200 290 C 210 298, 210 298, 220 290" fill="none" stroke="#a0705a" stroke-width="1" opacity="0.4" />
+
+                        <!-- Head -->
+                        <circle cx="210" cy="240" r="38" fill="url(#skin-grad)" stroke="#d4a387" stroke-width="2" />
+                        
+                        <!-- Ears -->
+                        <circle cx="170" cy="242" r="7" fill="url(#skin-grad)" stroke="#d4a387" stroke-width="1.5" />
+                        <circle cx="250" cy="242" r="7" fill="url(#skin-grad)" stroke="#d4a387" stroke-width="1.5" />
+
+                        <!-- Hair -->
+                        <path d="M 172 230 C 168 200, 180 185, 210 185 C 240 185, 252 200, 248 230 C 255 220, 252 195, 240 190 C 235 180, 220 178, 210 178 C 200 178, 185 180, 180 190 C 168 195, 165 220, 172 230 Z" fill="url(#hair-grad)" stroke="#1c1612" stroke-width="1.5" />
+                        <path d="M 172 225 C 172 210, 180 200, 195 195" fill="none" stroke="#54473d" stroke-width="2" stroke-linecap="round" opacity="0.3" />
+
+                        <!-- Glasses (Tech/Modern Look) -->
+                        <circle cx="194" cy="238" r="11" fill="none" stroke="#543821" stroke-width="2" />
+                        <circle cx="194" cy="238" r="10" fill="none" stroke="#d4a387" stroke-width="1" opacity="0.8" />
+                        
+                        <circle cx="226" cy="238" r="11" fill="none" stroke="#543821" stroke-width="2" />
+                        <circle cx="226" cy="238" r="10" fill="none" stroke="#d4a387" stroke-width="1" opacity="0.8" />
+                        
+                        <!-- Glasses Bridge -->
+                        <path d="M 205 238 L 215 238" stroke="#543821" stroke-width="2.5" />
+                        <!-- Glasses Sides -->
+                        <path d="M 183 238 L 172 235" stroke="#543821" stroke-width="2" />
+                        <path d="M 237 238 L 248 235" stroke="#543821" stroke-width="2" />
+
+                        <!-- Eyes (behind glasses) -->
+                        <circle cx="194" cy="238" r="2.5" fill="#1c1612" />
+                        <circle cx="226" cy="238" r="2.5" fill="#1c1612" />
+                        <path d="M 190 224 Q 194 221 198 224" fill="none" stroke="#1c1612" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M 222 224 Q 226 221 230 224" fill="none" stroke="#1c1612" stroke-width="1.5" stroke-linecap="round" />
+
+                        <!-- Nose -->
+                        <path d="M 210 234 L 208 245 L 212 245" fill="none" stroke="#d4a387" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+                        <!-- Cheerful Smile -->
+                        <path d="M 200 255 Q 210 264 220 255" fill="none" stroke="#a0705a" stroke-width="2.5" stroke-linecap="round" />
+
+                        <!-- Right Arm / Hand (Typing on Laptop) -->
+                        <g id="right-arm">
+                          <path d="M 245 330 C 265 340, 275 350, 290 365 C 285 370, 275 370, 255 358 C 245 350, 240 340, 245 330 Z" fill="url(#sweater-grad)" stroke="#4F5D2F" stroke-width="1.5" />
+                          <circle cx="290" cy="365" r="7.5" fill="url(#skin-grad)" stroke="#d4a387" stroke-width="1.5" />
+                        </g>
+
+                        <!-- LEFT ARM & HAND (WAVING ANIMATION TARGET) -->
+                        <!-- Pivot Center at Shoulder: (172, 325) -->
+                        <g id="waving-arm" style="transform-origin: 172px 325px;">
+                          <!-- Shoulder connection to Hand -->
+                          <path d="M 172 325 C 145 315, 130 290, 132 250 C 140 248, 150 255, 152 280 C 153 295, 162 315, 172 325 Z" fill="url(#sweater-grad)" stroke="#4F5D2F" stroke-width="1.5" />
+                          <!-- Waving Hand -->
+                          <g transform="translate(132, 245)">
+                            <!-- Palm -->
+                            <circle cx="0" cy="0" r="10" fill="url(#skin-grad)" stroke="#d4a387" stroke-width="1.5" />
+                            <!-- Fingers -->
+                            <!-- Thumb -->
+                            <path d="M 8 -2 C 14 -2, 14 4, 8 4" fill="none" stroke="#d4a387" stroke-width="2.5" stroke-linecap="round" />
+                            <!-- Index -->
+                            <path d="M 4 -8 C 6 -16, 0 -16, -2 -8" fill="none" stroke="#d4a387" stroke-width="2.5" stroke-linecap="round" />
+                            <!-- Middle -->
+                            <path d="M 0 -9 C 2 -18, -4 -18, -6 -9" fill="none" stroke="#d4a387" stroke-width="2.5" stroke-linecap="round" />
+                            <!-- Ring -->
+                            <path d="M -4 -8 C -2 -16, -8 -16, -10 -8" fill="none" stroke="#d4a387" stroke-width="2.5" stroke-linecap="round" />
+                            <!-- Little -->
+                            <path d="M -8 -6 C -7 -12, -12 -12, -13 -6" fill="none" stroke="#d4a387" stroke-width="2.5" stroke-linecap="round" />
+                          </g>
+                        </g>
+                      </g>
+
+                      <!-- MODERN LAPTOP -->
+                      <g id="laptop" filter="url(#drop-shadow)" transform="translate(265, 305)">
+                        <!-- Screen Light Projection Glow -->
+                        <path d="M 28 65 L -45 5 L -10 5 L 34 65 Z" fill="url(#screen-glow)" opacity="0.3" />
+                        
+                        <!-- Opened Screen Bezel -->
+                        <path d="M 28 65 L 5 2 C 3 0, 0 0, -2 2 L -20 30 C -22 33, -20 36, -17 38 Z" fill="#423d38" stroke="#544d47" stroke-width="1.5" />
+                        <path d="M 26 63 L 6 4 C 5 3, 3 3, 2 5 L -18 32 C -19 34, -18 36, -16 37 Z" fill="#24211f" />
+                        
+                        <!-- Screen Content (Charcoal Screen with Glowing Apple-Theme Code) -->
+                        <path d="M 23 60 L 8 10 C 8 8, 7 8, 6 9 L -14 34 L -10 53 Z" fill="#1D1D1F" />
+                        <!-- Glowing Code Lines -->
+                        <line x1="18" y1="50" x2="10" y2="30" stroke="#6B7A3D" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
+                        <line x1="14" y1="42" x2="6" y2="22" stroke="#87965A" stroke-width="1.5" stroke-linecap="round" opacity="0.9" />
+                        <line x1="8" y1="28" x2="3" y2="18" stroke="#FF9500" stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+                        <line x1="10" y1="55" x2="4" y2="40" stroke="#AF52DE" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
+
+                        <!-- Laptop Base/Keyboard -->
+                        <path d="M 18 67 L 78 67 L 72 73 C 71 74, 69 75, 67 75 L 7 75 C 5 75, 3 74, 2 73 Z" fill="url(#laptop-grad)" stroke="#544d47" stroke-width="1.5" />
+                        <!-- Keyboard Area -->
+                        <path d="M 21 68 L 72 68 L 68 72 L 17 72 Z" fill="#1D1D1F" />
+                        <!-- Trackpad -->
+                        <path d="M 40 73 L 50 73 L 49 74 L 41 74 Z" fill="#D2D2D7" />
+                      </g>
+                    </svg>
                 </div>
             </div>
         </div>
@@ -147,49 +329,88 @@
                 <div class="section-divider"></div>
             </div>
             
-            <div class="about-grid">
-                <div class="about-cards-container">
-                    <!-- Profile headshot photo inside About Me -->
-                    <div class="glass-card profile-pic-card reveal">
-                        <img src="assets/sri_portrait.jpg" alt="Srinivasan. S Portrait">
-                    </div>
-                    <div class="glass-card about-stat-card reveal">
-                        <i class="fa-solid fa-code"></i>
-                        <h3>Full Stack Dev</h3>
-                        <p>Django backend services, MySQL database logic, & responsive UI integration.</p>
-                    </div>
-                    <div class="glass-card about-stat-card secondary reveal">
-                        <i class="fa-solid fa-infinity"></i>
-                        <h3>DevOps Learner</h3>
-                        <p>Configuring AWS networks, Docker container builds, & setup of CI/CD automation.</p>
+            <div class="about-modern-layout reveal">
+                <!-- Asymmetrical highlight card -->
+                <div class="about-hero-card glass-card">
+                    <div class="about-hero-content">
+                        <span class="about-badge"><i class="fa-solid fa-graduation-cap"></i> BCA Graduate 2026</span>
+                        <h3 class="about-hero-quote">"Bridging the gap between robust backend architectures and automated cloud pipelines."</h3>
                     </div>
                 </div>
                 
-                <div class="about-details reveal">
-                    <h3 class="about-title">Building scalable web solutions and learning cloud ecosystems.</h3>
-                    <p class="about-text">
-                        I am a dedicated Python Full Stack Developer and aspiring DevOps engineer who graduated in BCA - DevOps & Automation from Coimbatore, Tamil Nadu. My primary focus is on developing robust web backends, managing database security, and writing clean backend services.
-                    </p>
-                    <p class="about-text">
-                        I believe in strong coding foundations and continuous deployment. By combining solid Python frameworks (Django, Flask) with core containerization (Docker) and AWS cloud solutions, I aim to create highly available, scalable application stacks.
-                    </p>
+                <div class="about-main-grid">
+                    <!-- Portrait Image Card -->
+                    <div class="glass-card about-portrait-card">
+                        <div class="about-portrait-img-wrapper">
+                            <img src="assets/sri_portrait.jpg" alt="Srinivasan. S Portrait">
+                        </div>
+                        <div class="about-portrait-info">
+                            <h4>Srinivasan. S</h4>
+                            <p>Python Full Stack &amp; DevOps Engineer</p>
+                        </div>
+                    </div>
                     
-                    <div class="about-info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Current Location</span>
-                            <span class="info-val">Coimbatore, Tamil Nadu, India</span>
+                    <!-- Bio & Pillars Card -->
+                    <div class="glass-card about-bio-card">
+                        <h3 class="about-title-modern">My Professional Mission</h3>
+                        <p class="about-text-modern">
+                            I am a dedicated Python Full Stack Developer and aspiring DevOps engineer who graduated in BCA - DevOps &amp; Automation from Coimbatore, Tamil Nadu. My primary focus is on developing robust web backends, managing database security, and writing clean backend services.
+                        </p>
+                        <p class="about-text-modern">
+                            I believe in strong coding foundations and continuous deployment. By combining solid Python frameworks (Django, Flask) with core containerization (Docker) and AWS cloud solutions, I aim to create highly available, scalable application stacks.
+                        </p>
+                        
+                        <!-- Core Specialization Pillars -->
+                        <div class="about-pillars">
+                            <div class="about-pillar-item">
+                                <div class="pillar-icon"><i class="fa-solid fa-code"></i></div>
+                                <div class="pillar-content">
+                                    <h5>Backend Architect</h5>
+                                    <p>Django backend APIs, secure database models, and server logic.</p>
+                                </div>
+                            </div>
+                            <div class="about-pillar-item">
+                                <div class="pillar-icon"><i class="fa-solid fa-infinity"></i></div>
+                                <div class="pillar-content">
+                                    <h5>DevOps Architect</h5>
+                                    <p>AWS architectures, Docker setups, and CI/CD automated deployments.</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Email Address</span>
-                            <span class="info-val"><a href="mailto:srinivasan.sriraman2346@gmail.com">srinivasan.sriraman2346@gmail.com</a></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Education Status</span>
-                            <span class="info-val">BCA Graduated (2023 - 2026)</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">GitHub Account</span>
-                            <span class="info-val"><a href="https://github.com/SrinivasanS23" target="_blank">github.com/SrinivasanS23</a></span>
+                    </div>
+                    
+                    <!-- Detailed metadata card -->
+                    <div class="glass-card about-meta-card">
+                        <h4 class="about-meta-title">Quick Informations</h4>
+                        <div class="about-meta-list">
+                            <div class="meta-list-item">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <div>
+                                    <span class="meta-item-label">Location</span>
+                                    <span class="meta-item-val">Coimbatore, Tamil Nadu, India</span>
+                                </div>
+                            </div>
+                            <div class="meta-list-item">
+                                <i class="fa-solid fa-envelope"></i>
+                                <div>
+                                    <span class="meta-item-label">Email</span>
+                                    <span class="meta-item-val"><a href="mailto:srinivasan.sriraman2346@gmail.com">srinivasan.sriraman2346@gmail.com</a></span>
+                                </div>
+                            </div>
+                            <div class="meta-list-item">
+                                <i class="fa-solid fa-circle-info"></i>
+                                <div>
+                                    <span class="meta-item-label">Education Status</span>
+                                    <span class="meta-item-val">BCA DevOps Graduated (2026)</span>
+                                </div>
+                            </div>
+                            <div class="meta-list-item">
+                                <i class="fa-brands fa-github"></i>
+                                <div>
+                                    <span class="meta-item-label">GitHub Account</span>
+                                    <span class="meta-item-val"><a href="https://github.com/SrinivasanS23" target="_blank">github.com/SrinivasanS23</a></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -386,7 +607,7 @@
                 
                 <div class="experience-visual reveal">
                     <div class="glass-card experience-img-card">
-                        <img src="assets/sri_speaking.jpg" alt="Srinivasan. S Presentation / Speaking">
+                        <img src="assets/sri_avatar.jpg" alt="Srinivasan. S Avatar">
                     </div>
                 </div>
             </div>
@@ -464,7 +685,7 @@
                 <div class="project-card-wrapper reveal" data-category="devops">
                     <div class="glass-card project-card">
                         <div class="project-image-wrapper">
-                            <img src="assets/cloud_devops_bg.png" alt="Secure AWS VPC Web Server">
+                            <img src="assets/aws_vpc_project.png" alt="Secure AWS VPC Web Server">
                         </div>
                         <div class="project-card-content">
                             <div class="project-tags">
@@ -485,109 +706,130 @@
                     </div>
                 </div>
 
-
-                <!-- Project 5: AI-Based Complaint Classifier -->
-                <div class="project-card-wrapper reveal" data-category="devops">
-                    <div class="glass-card project-card">
-                        <div class="project-image-wrapper">
-                            <img src="assets/cloud_devops_bg.png" alt="AI Complaint Classification System">
-                        </div>
-                        <div class="project-card-content">
-                            <div class="project-tags">
-                                <span class="project-tag">Python & Django</span>
-                                <span class="project-tag">Machine Learning</span>
-                                <span class="project-tag devops">GitHub Actions CI</span>
-                            </div>
-                            <h3 class="project-title">AI Complaint Classification System</h3>
-                            <p class="project-desc">
-                                Developed an NLP complaint classifier integrated with a Django web interface. Integrated automation testing pipelines with GitHub Actions CI workflows.
-                            </p>
-                            <div class="project-links">
-                                <a class="project-link" href="https://github.com/SrinivasanS23" target="_blank">
-                                    <i class="fa-brands fa-github"></i> Repository
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
 
-    <!-- Certifications & Education Section -->
+    <!-- Certifications & Achievements Section -->
     <section class="section" id="certifications">
         <div class="container">
             <div class="section-header">
                 <span class="section-subtitle">Credentials</span>
-                <h2 class="section-title">Certifications & Education</h2>
+                <h2 class="section-title">Certifications &amp; Achievements</h2>
                 <div class="section-divider"></div>
             </div>
             
-            <!-- Certifications Grid -->
-            <div class="certifications-grid">
-                <!-- Cert 1 -->
-                <div class="glass-card cert-card reveal">
-                    <div class="cert-icon">
-                        <i class="fa-solid fa-medal"></i>
-                    </div>
-                    <div class="cert-info">
-                        <h3 class="cert-name">Certified Python Full-Stack Developer</h3>
-                        <span class="cert-provider">Pumo Technovation Pvt Ltd</span>
-                        <span class="cert-date">2024</span>
+            <!-- Credentials Split Layout (Left Certifications, Right Achievements) -->
+            <div class="credentials-split-grid">
+                
+                <!-- Left Column: Certifications -->
+                <div class="credentials-column">
+                    <h3 class="column-title"><i class="fa-solid fa-award"></i> Certifications</h3>
+                    <div class="column-cards">
+                        <!-- New DevOps Cert -->
+                        <div class="glass-card cert-card-modern reveal">
+                            <div class="cert-icon-modern">
+                                <i class="fa-solid fa-infinity"></i>
+                            </div>
+                            <div class="cert-info-modern">
+                                <h4 class="cert-name-modern">Professional Certificate in DevOps</h4>
+                                <span class="cert-provider-modern">Udemy</span>
+                                <span class="cert-date-modern"><i class="fa-regular fa-calendar-days"></i> Sept 2025</span>
+                            </div>
+                        </div>
+                        <!-- Cert 1 -->
+                        <div class="glass-card cert-card-modern reveal">
+                            <div class="cert-icon-modern">
+                                <i class="fa-solid fa-medal"></i>
+                            </div>
+                            <div class="cert-info-modern">
+                                <h4 class="cert-name-modern">Certified Python Full-Stack Developer</h4>
+                                <span class="cert-provider-modern">Pumo Technovation Pvt Ltd</span>
+                                <span class="cert-date-modern"><i class="fa-regular fa-calendar-days"></i> 2024</span>
+                            </div>
+                        </div>
+                        <!-- Cert 2 -->
+                        <div class="glass-card cert-card-modern reveal">
+                            <div class="cert-icon-modern">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                            <div class="cert-info-modern">
+                                <h4 class="cert-name-modern">Intensified DevOps Training Program</h4>
+                                <span class="cert-provider-modern">MVIII Tech (OPC) Pvt. Ltd.</span>
+                                <span class="cert-date-modern"><i class="fa-regular fa-calendar-days"></i> Completed</span>
+                            </div>
+                        </div>
+                        <!-- Cert 3 -->
+                        <div class="glass-card cert-card-modern reveal">
+                            <div class="cert-icon-modern">
+                                <i class="fa-solid fa-terminal"></i>
+                            </div>
+                            <div class="cert-info-modern">
+                                <h4 class="cert-name-modern">Bash Scripting &amp; Shell Automation</h4>
+                                <span class="cert-provider-modern">Udemy Certification</span>
+                                <span class="cert-date-modern"><i class="fa-regular fa-calendar-days"></i> Credentials Earned</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Cert 2 -->
-                <div class="glass-card cert-card reveal">
-                    <div class="cert-icon">
-                        <i class="fa-solid fa-infinity"></i>
-                    </div>
-                    <div class="cert-info">
-                        <h3 class="cert-name">Intensified DevOps Training Program</h3>
-                        <span class="cert-provider">MVIII Tech (OPC) Pvt. Ltd.</span>
-                        <span class="cert-date">Completed</span>
-                    </div>
-                </div>
-                
-                <!-- Cert 3 -->
-                <div class="glass-card cert-card reveal">
-                    <div class="cert-icon">
-                        <i class="fa-solid fa-terminal"></i>
-                    </div>
-                    <div class="cert-info">
-                        <h3 class="cert-name">Bash Scripting & Shell Automation</h3>
-                        <span class="cert-provider">Udemy Certification</span>
-                        <span class="cert-date">Credentials Earned</span>
+                <!-- Right Column: Achievements -->
+                <div class="credentials-column">
+                    <h3 class="column-title"><i class="fa-solid fa-trophy"></i> Achievements</h3>
+                    <div class="column-cards">
+                        <!-- Achievement 1 -->
+                        <div class="glass-card achievement-card-modern reveal">
+                            <div class="ach-icon-modern">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <div class="ach-info-modern">
+                                <h4 class="ach-name-modern">Infosys BPM Skill Development Program</h4>
+                                <p class="ach-desc-modern">Secured #1 Overall winners of the Event Conducted.</p>
+                            </div>
+                        </div>
+                        <!-- Achievement 2 -->
+                        <div class="glass-card achievement-card-modern reveal">
+                            <div class="ach-icon-modern">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div class="ach-info-modern">
+                                <h4 class="ach-name-modern">Academics Class Topper</h4>
+                                <p class="ach-desc-modern">Secured Overall #3 Class Topper in my class during my academics.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Education Grid -->
-            <div class="education-grid">
-                <!-- Degree 1 -->
-                <div class="glass-card edu-card reveal">
-                    <h3 class="edu-degree">BCA - DevOps & Automation</h3>
-                    <span class="edu-college">Rathinam College of Arts & Science, Coimbatore</span>
-                    <div class="edu-meta">
-                        <span class="edu-duration"><i class="fa-regular fa-calendar-days"></i> 2023 - 2026 (Graduated)</span>
-                        <span class="edu-score">CGPA: <span>8.35</span></span>
+            <!-- Education Subsection below columns -->
+            <div class="education-section-modern">
+                <h3 class="education-section-title"><i class="fa-solid fa-graduation-cap"></i> Education Journey</h3>
+                <div class="education-grid-modern">
+                    <!-- Degree 1 -->
+                    <div class="glass-card edu-card-modern reveal">
+                        <div class="edu-header-modern">
+                            <h4 class="edu-degree-modern">BCA - DevOps &amp; Automation</h4>
+                            <span class="edu-score-modern">CGPA: 8.35</span>
+                        </div>
+                        <span class="edu-college-modern">Rathinam College of Arts &amp; Science, Coimbatore</span>
+                        <span class="edu-duration-modern"><i class="fa-regular fa-calendar-days"></i> 2023 - 2026 (Graduated)</span>
+                        <p class="edu-text-modern">
+                            Focused coursework: Operating Systems Administration, Container Orchestration, Cloud Architecture, Automation Scripting, Web Tech stacks.
+                        </p>
                     </div>
-                    <p class="about-text">
-                        Focused coursework: Operating Systems Administration, Container Orchestration, Cloud Architecture, Automation Scripting, Web Tech stacks.
-                    </p>
-                </div>
-                
-                <!-- Degree 2 -->
-                <div class="glass-card edu-card reveal">
-                    <h3 class="edu-degree">HSC (Higher Secondary)</h3>
-                    <span class="edu-college">PSG Sarvajana Hr.Sec.School, Coimbatore</span>
-                    <div class="edu-meta">
-                        <span class="edu-duration"><i class="fa-regular fa-calendar-days"></i> Graduated 2023</span>
-                        <span class="edu-score">Score: <span>92.1%</span></span>
+                    
+                    <!-- Degree 2 -->
+                    <div class="glass-card edu-card-modern reveal">
+                        <div class="edu-header-modern">
+                            <h4 class="edu-degree-modern">HSC (Higher Secondary)</h4>
+                            <span class="edu-score-modern">Score: 92.1%</span>
+                        </div>
+                        <span class="edu-college-modern">PSG Sarvajana Hr.Sec.School, Coimbatore</span>
+                        <span class="edu-duration-modern"><i class="fa-regular fa-calendar-days"></i> Graduated 2023</span>
+                        <p class="edu-text-modern">
+                            Academic background in core sciences and computing algorithms. Achieved excellent score reflecting consistency and strong learning capabilities.
+                        </p>
                     </div>
-                    <p class="about-text">
-                        Academic background in core sciences and computing algorithms. Achieved excellent score reflecting consistency and strong learning capabilities.
-                    </p>
                 </div>
             </div>
         </div>
@@ -647,7 +889,7 @@
                     <div class="social-links">
                         <a class="social-btn" href="https://github.com/SrinivasanS23" target="_blank"><i class="fa-brands fa-github"></i></a>
                         <a class="social-btn" href="https://www.linkedin.com/in/srinivasan-s-0784282a9/" target="_blank"><i class="fa-brands fa-linkedin-in"></i></a>
-                        <a class="social-btn" href="https://www.instagram.com/srinivasan.sriraman23/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                        <a class="social-btn" href="https://www.instagram.com/_codewidsrini_" target="_blank"><i class="fa-brands fa-instagram"></i></a>
                         <a class="social-btn" href="https://wa.me/918870798720" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
                     </div>
                 </div>
