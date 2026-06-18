@@ -2026,26 +2026,15 @@ body.loading-active .cursor-jm {
 }
 
 /* ==========================================================================
-   SVG AVATAR WAVE ANIMATION
+   HERO PORTRAIT PHOTO HOVER
    ========================================================================== */
 
-@keyframes wave {
-    0% { transform: rotate(0deg); }
-    15% { transform: rotate(-14deg); }
-    30% { transform: rotate(10deg); }
-    45% { transform: rotate(-14deg); }
-    60% { transform: rotate(10deg); }
-    75% { transform: rotate(-6deg); }
-    90% { transform: rotate(3deg); }
-    100% { transform: rotate(0deg); }
+.hero-visual-card img {
+    transition: transform var(--transition-normal);
 }
 
-.hero-animate #waving-arm {
-    animation: wave 1.8s ease-in-out;
-}
-
-.hero-visual-card:hover #waving-arm {
-    animation: wave 1.5s ease-in-out infinite;
+.hero-visual-card:hover img {
+    transform: scale(1.03);
 }
 
 /* ==========================================================================
