@@ -213,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (typedTextSpan) {
+        typedTextSpan.textContent = ""; // Clear fallback text before typing starts
         setTimeout(type, newRoleDelay);
     }
 
