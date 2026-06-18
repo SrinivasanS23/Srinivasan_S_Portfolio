@@ -106,19 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navbar) {
         window.addEventListener('scroll', () => {
             if (window.scrollY > 50) {
-                navbar.style.background = 'rgba(10, 10, 10, 0.9)';
-                navbar.style.paddingTop = '0.5rem';
-                navbar.style.paddingBottom = '0.5rem';
-                navbar.style.marginTop = '0.75rem';
-                navbar.style.width = '95%';
-                navbar.style.boxShadow = '0 20px 45px rgba(0, 0, 0, 0.5)';
+                navbar.classList.add('scrolled');
             } else {
-                navbar.style.background = 'rgba(10, 10, 10, 0.45)';
-                navbar.style.paddingTop = '';
-                navbar.style.paddingBottom = '';
-                navbar.style.marginTop = '1.5rem';
-                navbar.style.width = '90%';
-                navbar.style.boxShadow = '0 15px 40px rgba(0, 0, 0, 0.3)';
+                navbar.classList.remove('scrolled');
             }
         });
     }
