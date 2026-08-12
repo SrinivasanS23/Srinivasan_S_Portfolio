@@ -14,6 +14,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
   const canvasRef = useRef(null);
   const dollyRef = useRef(null);
   const morphRef = useRef(null);
+  const subtitleRef = useRef(null);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showSubtitle, setShowSubtitle] = useState(true);
@@ -45,27 +46,68 @@ export default function HeroSequence({ heroImages, mobileImages }) {
 
   const activeImages = isMobile && mobileImages && mobileImages.length > 0 ? mobileImages : heroImages;
 
+  // Search for the closest loaded frame to eliminate any black screens or missing visuals
+  const getNearestLoadedImage = (primaryImages, fallbackImages, targetIndex) => {
+    const list = primaryImages && primaryImages.length > 0 ? primaryImages : fallbackImages;
+    if (!list || list.length === 0) return null;
+
+    const target = Math.max(0, Math.min(TOTAL_HERO_FRAMES - 1, Math.round(targetIndex)));
+
+    // 1. Direct hit on target
+    if (list[target] && list[target].complete && list[target].naturalWidth > 0) {
+      return { img: list[target], index: target };
+    }
+
+    // 2. Search outward in primary list
+    for (let offset = 1; offset < 40; offset++) {
+      const prev = target - offset;
+      if (prev >= 0 && list[prev] && list[prev].complete && list[prev].naturalWidth > 0) {
+        return { img: list[prev], index: prev };
+      }
+      const next = target + offset;
+      if (next < list.length && list[next] && list[next].complete && list[next].naturalWidth > 0) {
+        return { img: list[next], index: next };
+      }
+    }
+
+    // 3. Fallback to alternate list (e.g. desktop frames if on mobile)
+    const fallbackList = fallbackImages && fallbackImages.length > 0 ? fallbackImages : null;
+    if (fallbackList) {
+      for (let offset = 0; offset < 40; offset++) {
+        const prev = target - offset;
+        if (prev >= 0 && fallbackList[prev] && fallbackList[prev].complete && fallbackList[prev].naturalWidth > 0) {
+          return { img: fallbackList[prev], index: prev };
+        }
+      }
+    }
+
+    // 4. Any loaded frame
+    for (let i = 0; i < list.length; i++) {
+      if (list[i] && list[i].complete && list[i].naturalWidth > 0) {
+        return { img: list[i], index: i };
+      }
+    }
+
+    return null;
+  };
+
   // Render Frame directly to canvas with aspect-ratio cover
   const renderFrame = (index) => {
     const canvas = canvasRef.current;
-    if (!canvas || !activeImages || activeImages.length === 0) return;
+    if (!canvas) return;
 
-    const clampedIndex = Math.max(0, Math.min(TOTAL_HERO_FRAMES - 1, Math.round(index)));
-    let img = activeImages[clampedIndex];
-
-    // Fallback to nearest loaded frame if current frame is loading to eliminate blank canvas
-    if (!img || !img.complete || img.naturalWidth === 0) {
-      img = activeImages[lastLoadedFrameRef.current] || activeImages[0];
-      if (!img || !img.complete || img.naturalWidth === 0) return;
-    } else {
-      lastLoadedFrameRef.current = clampedIndex;
-    }
+    const match = getNearestLoadedImage(activeImages, isMobile ? heroImages : mobileImages, index);
+    if (!match || !match.img) return;
+    const img = match.img;
 
     const ctx = canvas.getContext('2d');
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
+    if (canvasWidth === 0 || canvasHeight === 0) return;
+
     const imgWidth = img.naturalWidth || img.width;
     const imgHeight = img.naturalHeight || img.height;
+    if (imgWidth === 0 || imgHeight === 0) return;
 
     const imgRatio = imgWidth / imgHeight;
     const canvasRatio = canvasWidth / canvasHeight;
@@ -84,9 +126,9 @@ export default function HeroSequence({ heroImages, mobileImages }) {
       offsetY = 0;
     }
 
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    // Direct draw without clearRect to prevent black flash glitch
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-    lastRenderedFrameRef.current = clampedIndex;
+    lastRenderedFrameRef.current = match.index;
   };
 
   // High-Performance 60 FPS Animation & Render Loop
@@ -129,6 +171,16 @@ export default function HeroSequence({ heroImages, mobileImages }) {
         morphRef.current.style.opacity = morphOpacity;
       }
 
+      // Smooth Subtitle Fade & Float without re-rendering
+      if (subtitleRef.current) {
+        const progress = scrollProgRef.current;
+        const subOpacity = Math.max(0, 1 - progress * 6.5);
+        const subY = progress * -30;
+        subtitleRef.current.style.opacity = subOpacity;
+        subtitleRef.current.style.transform = `translate(-50%, ${subY}px)`;
+        subtitleRef.current.style.display = subOpacity <= 0.01 ? 'none' : 'block';
+      }
+
       animFrameIdRef.current = requestAnimationFrame(updateLoop);
     };
 
@@ -142,7 +194,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
     };
   }, [activeImages, isMobile]);
 
-  // Handle Resize
+  // Handle Resize and Initial Render
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
@@ -154,8 +206,12 @@ export default function HeroSequence({ heroImages, mobileImages }) {
     };
 
     handleResize();
+    const timer = setTimeout(handleResize, 100);
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [activeImages]);
 
   // GSAP ScrollTrigger Binding
@@ -455,7 +511,8 @@ export default function HeroSequence({ heroImages, mobileImages }) {
                 fontFamily: "'Fira Code', 'JetBrains Mono', monospace",
                 zIndex: 15,
                 overflow: 'hidden',
-                animation: 'subtleFlicker 0.2s infinite alternate'
+                WebkitFontSmoothing: 'antialiased',
+                backfaceVisibility: 'hidden'
               }}
             >
               {terminalStage === 'powerOn' && (
@@ -549,46 +606,41 @@ export default function HeroSequence({ heroImages, mobileImages }) {
         )}
       </div>
 
-      {/* Hero Story Subtitles */}
-      <AnimatePresence>
-        {showSubtitle && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -30 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              position: 'absolute',
-              bottom: '10vh',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              textAlign: 'center',
-              zIndex: 30,
-              pointerEvents: 'none',
-              width: '90%',
-              maxWidth: '680px'
-            }}
-          >
-            <h1
-              style={{
-                fontFamily: "'Array', sans-serif",
-                fontSize: isMobile ? '1.8rem' : '2.8rem',
-                fontWeight: 900,
-                color: '#FFFFFF',
-                letterSpacing: '-0.02em',
-                textShadow: '0 4px 20px rgba(0,0,0,0.85)'
-              }}
-            >
-              <span>
-                <InteractiveTitle text="SRINIVASAN. S" />
-              </span>
-            </h1>
-            <p style={{ marginTop: '0.5rem', color: '#E0E0E0', fontSize: isMobile ? '0.95rem' : '1.05rem', lineHeight: 1.6 }}>
-              Scroll downward as the developer enters the room.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Hero Story Subtitles: Smooth Ref-Driven Non-Flickering Fade */}
+      <div
+        ref={subtitleRef}
+        style={{
+          position: 'absolute',
+          bottom: '10vh',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          textAlign: 'center',
+          zIndex: 30,
+          pointerEvents: 'none',
+          width: '90%',
+          maxWidth: '680px',
+          willChange: 'opacity, transform',
+          transition: 'opacity 0.1s linear'
+        }}
+      >
+        <h1
+          style={{
+            fontFamily: "'Array', sans-serif",
+            fontSize: isMobile ? '1.8rem' : '2.8rem',
+            fontWeight: 900,
+            color: '#FFFFFF',
+            letterSpacing: '-0.02em',
+            textShadow: '0 4px 20px rgba(0,0,0,0.85)'
+          }}
+        >
+          <span>
+            <InteractiveTitle text="SRINIVASAN. S" />
+          </span>
+        </h1>
+        <p style={{ marginTop: '0.5rem', color: '#E0E0E0', fontSize: isMobile ? '0.95rem' : '1.05rem', lineHeight: 1.6 }}>
+          Scroll downward as the developer enters the room.
+        </p>
+      </div>
 
       {/* SEAMLESS TV MORPH TRANSITION INTO ABOUT SECTION */}
       <div

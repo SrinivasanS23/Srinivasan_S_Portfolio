@@ -14,13 +14,14 @@ export function useSequencePreloader() {
   const isCompletedRef = useRef(false);
 
   useEffect(() => {
-    let heroLoadedCount = 0;
+    const isMobileClient = typeof window !== 'undefined' && window.innerWidth < 768;
+
+    let primaryLoadedCount = 0;
     const heroCache = new Array(TOTAL_HERO_FRAMES);
     const mobileCache = new Array(TOTAL_MOBILE_FRAMES);
     const footCache = new Array(TOTAL_FOOT_FRAMES);
 
-    // Initial critical threshold for quick start (first 25 frames)
-    const criticalThreshold = 25;
+    const criticalThreshold = 20;
 
     const finishLoading = () => {
       if (isCompletedRef.current) return;
@@ -33,37 +34,42 @@ export function useSequencePreloader() {
     };
 
     const handleFrameLoad = () => {
-      heroLoadedCount++;
-      const pct = Math.min(100, Math.floor((heroLoadedCount / 100) * 100));
+      primaryLoadedCount++;
+      const pct = Math.min(100, Math.floor((primaryLoadedCount / 75) * 100));
       setProgress((prev) => Math.max(prev, pct));
 
-      if (heroLoadedCount >= criticalThreshold && !isCompletedRef.current) {
-        // Expose cached arrays so scrubbing works immediately
+      if (primaryLoadedCount >= criticalThreshold && !isCompletedRef.current) {
         setHeroImages(heroCache);
         setMobileImages(mobileCache);
         setFootImages(footCache);
         setIsLoaded(true);
       }
-      if (heroLoadedCount >= 90) {
+      if (primaryLoadedCount >= 70) {
         finishLoading();
       }
     };
 
-    // 1. Preload ALL 300 Hero Frames (Batch Priority)
+    // 1. Preload Desktop Hero Frames
     for (let i = 1; i <= TOTAL_HERO_FRAMES; i++) {
       const img = new Image();
       const frameNum = String(i).padStart(3, '0');
       img.src = `/assets/Hero-trns/ezgif-frame-${frameNum}.png`;
-      img.onload = handleFrameLoad;
-      img.onerror = handleFrameLoad;
+      if (!isMobileClient) {
+        img.onload = handleFrameLoad;
+        img.onerror = handleFrameLoad;
+      }
       heroCache[i - 1] = img;
     }
 
-    // 2. Preload Mobile Frames
+    // 2. Preload Mobile Frames (High priority on mobile devices)
     for (let i = 1; i <= TOTAL_MOBILE_FRAMES; i++) {
       const img = new Image();
       const frameNum = String(i).padStart(3, '0');
       img.src = `/assets/Mobile-trns/ezgif-frame-${frameNum}.png`;
+      if (isMobileClient) {
+        img.onload = handleFrameLoad;
+        img.onerror = handleFrameLoad;
+      }
       mobileCache[i - 1] = img;
     }
 
@@ -75,7 +81,11 @@ export function useSequencePreloader() {
       footCache[i - 1] = img;
     }
 
-    // Fail-safe guarantee: Max 1.8s
+    // Expose caches immediately to ensure initial frame is available
+    setHeroImages(heroCache);
+    setMobileImages(mobileCache);
+    setFootImages(footCache);
+
     const failSafeTimeout = setTimeout(() => {
       finishLoading();
     }, 1800);

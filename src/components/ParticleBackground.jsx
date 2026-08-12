@@ -4,16 +4,11 @@ import React, { useEffect, useRef } from 'react';
  * Enhanced Cosmic Universe Background:
  * 1. Active strictly from the About Section onwards (hidden during Hero Sequence).
  * 2. Refined, subtle "Entering Space" Warp Transition (sleek, elegant light filaments).
- * 3. 24 Real Celestial Worlds & Exoplanets:
- *    - Sun (Stellar Core)
- *    - Mercury, Venus, Earth (+ Moon), Mars
- *    - Ceres, Jupiter, Io, Europa
- *    - Saturn (with rings), Titan
- *    - Uranus (with vertical ring), Neptune, Triton
- *    - Pluto & Charon, Haumea (with ring), Makemake, Eris
- *    - Famous Exoplanets: Kepler-186f, Kepler-22b, Proxima b, 55 Cancri e, HD 189733b
- * 4. Realistic Asteroid Field (30+ tumbling rocky polygons) & Stardust.
- * 5. Interactive Mouse Evasion Physics across all floating celestial elements!
+ * 3. 24 Real Celestial Worlds & Exoplanets + 30 Asteroids.
+ * 4. Full Mobile & Touch Interactive Physics:
+ *    - Touch-move & tap repulsion: finger swipes repel nearby planets, asteroids, and stars.
+ *    - Scroll Velocity Dynamics: scrolling on mobile / desktop creates a directional space-flow wave.
+ *    - Side-scroll repulsion: scrolling on the left or right side pushes celestial bodies on that side naturally!
  */
 export default function ParticleBackground() {
   const canvasRef = useRef(null);
@@ -27,48 +22,80 @@ export default function ParticleBackground() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    // Mouse tracking
-    const mouse = {
+    // Mouse / Touch pointer tracking
+    const pointer = {
       x: -1000,
       y: -1000,
-      active: false
+      active: false,
+      isTouch: false
     };
-    let mouseTimeout;
+    let pointerTimeout;
 
     const handleMouseMove = (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-      mouse.active = true;
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      pointer.active = true;
+      pointer.isTouch = false;
 
-      clearTimeout(mouseTimeout);
-      mouseTimeout = setTimeout(() => {
-        mouse.active = false;
+      clearTimeout(pointerTimeout);
+      pointerTimeout = setTimeout(() => {
+        pointer.active = false;
       }, 2000);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    const handleTouch = (e) => {
+      if (e.touches && e.touches.length > 0) {
+        pointer.x = e.touches[0].clientX;
+        pointer.y = e.touches[0].clientY;
+        pointer.active = true;
+        pointer.isTouch = true;
 
-    // Scroll state tracking relative to About Section
+        clearTimeout(pointerTimeout);
+        pointerTimeout = setTimeout(() => {
+          pointer.active = false;
+        }, 1500);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchstart', handleTouch, { passive: true });
+    window.addEventListener('touchmove', handleTouch, { passive: true });
+    window.addEventListener('touchend', () => {
+      pointerTimeout = setTimeout(() => {
+        pointer.active = false;
+      }, 800);
+    }, { passive: true });
+
+    // Scroll state tracking & Scroll-Velocity Wave
     let spaceOpacity = 0;
     let targetSpaceOpacity = 0;
     let warpFactor = 0;
     let targetWarpFactor = 0;
+    let lastScrollY = window.scrollY;
+    let scrollVelY = 0;
 
     const checkScrollSection = () => {
+      const currentY = window.scrollY;
+      const deltaY = currentY - lastScrollY;
+      lastScrollY = currentY;
+
+      // Calculate scroll velocity impulse (capped for smoothness)
+      scrollVelY = Math.max(-12, Math.min(12, deltaY * 0.25));
+
       const aboutEl = document.getElementById('about');
       if (!aboutEl) return;
 
       const rect = aboutEl.getBoundingClientRect();
       const windowH = window.innerHeight;
 
-      // Inside Hero Sequence (above About)
+      // Inside Hero Sequence
       if (rect.top > windowH + 120) {
         targetSpaceOpacity = 0;
         targetWarpFactor = 0;
       }
       // Transitioning from Hero into About (Subtle Space Warp)
       else if (rect.top > 0 && rect.top <= windowH + 120) {
-        const transitionProgress = 1 - (rect.top / (windowH + 120)); // 0 -> 1
+        const transitionProgress = 1 - (rect.top / (windowH + 120));
         targetSpaceOpacity = Math.min(1, transitionProgress * 1.4);
         targetWarpFactor = Math.sin(transitionProgress * Math.PI) * 0.55;
       }
@@ -115,7 +142,7 @@ export default function ParticleBackground() {
         this.color = colors[Math.floor(Math.random() * colors.length)];
       }
 
-      update(currentWarp) {
+      update(currentWarp, scrollImpulse) {
         this.twinklePhase += this.twinkleSpeed;
         this.alpha = this.baseAlpha + Math.sin(this.twinklePhase) * 0.2;
         if (this.alpha < 0.08) this.alpha = 0.08;
@@ -140,18 +167,28 @@ export default function ParticleBackground() {
           this.prevX = this.x;
           this.prevY = this.y;
 
-          if (mouse.active) {
-            const dx = this.x - mouse.x;
-            const dy = this.y - mouse.y;
+          // Pointer (Mouse / Touch) Evade Physics
+          if (pointer.active) {
+            const dx = this.x - pointer.x;
+            const dy = this.y - pointer.y;
             const dist = Math.hypot(dx, dy);
-            const repelRadius = 120;
+            const repelRadius = pointer.isTouch ? 150 : 120;
 
             if (dist < repelRadius && dist > 0) {
               const force = (repelRadius - dist) / repelRadius;
               const angle = Math.atan2(dy, dx);
-              this.vx += Math.cos(angle) * force * 1.1;
-              this.vy += Math.sin(angle) * force * 1.1;
+              const pushMultiplier = pointer.isTouch ? 1.5 : 1.1;
+              this.vx += Math.cos(angle) * force * pushMultiplier;
+              this.vy += Math.sin(angle) * force * pushMultiplier;
             }
+          }
+
+          // Scroll velocity dynamic flow
+          if (Math.abs(scrollImpulse) > 0.1) {
+            this.vy -= scrollImpulse * 0.15;
+            // Part outward if scrolling down the center
+            const sidePush = (this.x - width / 2) / (width / 2);
+            this.vx += sidePush * Math.abs(scrollImpulse) * 0.06;
           }
 
           this.vx = this.vx * 0.92 + this.baseVx * 0.08;
@@ -193,10 +230,9 @@ export default function ParticleBackground() {
     }
 
     // ----------------------------------------------------
-    // 2. EXPANDED UNIVERSE: 24 REAL PLANETS & EXOPLANETS
+    // 2. EXPANDED 24 REAL CELESTIAL WORLDS & EXOPLANETS
     // ----------------------------------------------------
     const ALL_CELESTIAL_BODIES = [
-      // --- Solar System Core & Inner Planets ---
       {
         name: 'Sun',
         radius: 14,
@@ -246,8 +282,6 @@ export default function ParticleBackground() {
         gradient: ['#F0F0F0', '#999999', '#444444'],
         initialPos: { xRatio: 0.44, yRatio: 0.85 }
       },
-
-      // --- Gas & Ice Giants ---
       {
         name: 'Jupiter',
         radius: 12.5,
@@ -318,8 +352,6 @@ export default function ParticleBackground() {
         gradient: ['#EDE7F6', '#9575CD', '#311B92'],
         initialPos: { xRatio: 0.54, yRatio: 0.42 }
       },
-
-      // --- Kuiper Belt & Dwarf Worlds ---
       {
         name: 'Pluto',
         radius: 2.7,
@@ -363,10 +395,8 @@ export default function ParticleBackground() {
         gradient: ['#FFFFFF', '#CFD8DC', '#37474F'],
         initialPos: { xRatio: 0.82, yRatio: 0.08 }
       },
-
-      // --- Famous Exoplanets & Alien Worlds ---
       {
-        name: 'Kepler-186f', // Habitable Emerald-Azure Super-Earth
+        name: 'Kepler-186f',
         radius: 5.5,
         hasRing: false,
         glowColor: 'rgba(80, 220, 150, 0.35)',
@@ -374,7 +404,7 @@ export default function ParticleBackground() {
         initialPos: { xRatio: 0.70, yRatio: 0.36 }
       },
       {
-        name: 'Kepler-22b', // Deep Ocean Waterworld
+        name: 'Kepler-22b',
         radius: 6.2,
         hasRing: false,
         glowColor: 'rgba(0, 230, 230, 0.35)',
@@ -382,7 +412,7 @@ export default function ParticleBackground() {
         initialPos: { xRatio: 0.28, yRatio: 0.52 }
       },
       {
-        name: 'Proxima Centauri b', // Red Dwarf Planet
+        name: 'Proxima Centauri b',
         radius: 4.8,
         hasRing: false,
         glowColor: 'rgba(255, 90, 90, 0.35)',
@@ -390,7 +420,7 @@ export default function ParticleBackground() {
         initialPos: { xRatio: 0.50, yRatio: 0.66 }
       },
       {
-        name: '55 Cancri e', // Sparkling Diamond / Carbon World
+        name: '55 Cancri e',
         radius: 5.2,
         hasRing: true,
         ringColor: 'rgba(255, 230, 150, 0.45)',
@@ -401,7 +431,7 @@ export default function ParticleBackground() {
         initialPos: { xRatio: 0.85, yRatio: 0.48 }
       },
       {
-        name: 'HD 189733b', // Glass Rain Deep Cobalt Exoplanet
+        name: 'HD 189733b',
         radius: 6.8,
         hasRing: false,
         glowColor: 'rgba(30, 144, 255, 0.45)',
@@ -430,23 +460,31 @@ export default function ParticleBackground() {
         }
       }
 
-      update() {
+      update(scrollImpulse) {
         this.floatPhase += this.floatSpeed;
         const floatOffset = Math.sin(this.floatPhase) * 0.15;
 
-        // Mouse Evade Physics
-        if (mouse.active) {
-          const dx = this.x - mouse.x;
-          const dy = this.y - mouse.y;
+        // Pointer (Mouse / Touch) Evade Physics
+        if (pointer.active) {
+          const dx = this.x - pointer.x;
+          const dy = this.y - pointer.y;
           const dist = Math.hypot(dx, dy);
-          const repelRadius = 180;
+          const repelRadius = pointer.isTouch ? 220 : 180;
 
           if (dist < repelRadius && dist > 0) {
             const force = (repelRadius - dist) / repelRadius;
             const angle = Math.atan2(dy, dx);
-            this.vx += Math.cos(angle) * force * 1.5;
-            this.vy += Math.sin(angle) * force * 1.5;
+            const pushMultiplier = pointer.isTouch ? 2.2 : 1.5;
+            this.vx += Math.cos(angle) * force * pushMultiplier;
+            this.vy += Math.sin(angle) * force * pushMultiplier;
           }
+        }
+
+        // Scroll velocity dynamic flow for planets
+        if (Math.abs(scrollImpulse) > 0.1) {
+          this.vy -= scrollImpulse * 0.08;
+          const sidePush = (this.x - width / 2) / (width / 2);
+          this.vx += sidePush * Math.abs(scrollImpulse) * 0.04;
         }
 
         this.vx = this.vx * 0.93 + this.baseVx * 0.07;
@@ -561,21 +599,28 @@ export default function ParticleBackground() {
         this.color = shades[Math.floor(Math.random() * shades.length)];
       }
 
-      update() {
+      update(scrollImpulse) {
         this.rotation += this.rotSpeed;
 
-        if (mouse.active) {
-          const dx = this.x - mouse.x;
-          const dy = this.y - mouse.y;
+        if (pointer.active) {
+          const dx = this.x - pointer.x;
+          const dy = this.y - pointer.y;
           const dist = Math.hypot(dx, dy);
-          const repelRadius = 110;
+          const repelRadius = pointer.isTouch ? 140 : 110;
 
           if (dist < repelRadius && dist > 0) {
             const force = (repelRadius - dist) / repelRadius;
             const angle = Math.atan2(dy, dx);
-            this.vx += Math.cos(angle) * force * 1.3;
-            this.vy += Math.sin(angle) * force * 1.3;
+            const pushMultiplier = pointer.isTouch ? 1.8 : 1.3;
+            this.vx += Math.cos(angle) * force * pushMultiplier;
+            this.vy += Math.sin(angle) * force * pushMultiplier;
           }
+        }
+
+        if (Math.abs(scrollImpulse) > 0.1) {
+          this.vy -= scrollImpulse * 0.18;
+          const sidePush = (this.x - width / 2) / (width / 2);
+          this.vx += sidePush * Math.abs(scrollImpulse) * 0.08;
         }
 
         this.vx = this.vx * 0.94 + this.baseVx * 0.06;
@@ -621,6 +666,7 @@ export default function ParticleBackground() {
 
       spaceOpacity += (targetSpaceOpacity - spaceOpacity) * 0.08;
       warpFactor += (targetWarpFactor - warpFactor) * 0.1;
+      scrollVelY *= 0.92; // Decay scroll impulse smoothly
 
       if (spaceOpacity > 0.01) {
         ctx.save();
@@ -628,14 +674,14 @@ export default function ParticleBackground() {
 
         // 1. Stars
         for (let i = 0; i < stars.length; i++) {
-          stars[i].update(warpFactor);
+          stars[i].update(warpFactor, scrollVelY);
           stars[i].draw(warpFactor);
         }
 
         // 2. Asteroids & Debris
         if (warpFactor < 0.25) {
           for (let i = 0; i < asteroids.length; i++) {
-            asteroids[i].update();
+            asteroids[i].update(scrollVelY);
             asteroids[i].draw();
           }
         }
@@ -643,7 +689,7 @@ export default function ParticleBackground() {
         // 3. 24 Real Planets & Exoplanets
         if (warpFactor < 0.35) {
           for (let i = 0; i < planets.length; i++) {
-            planets[i].update();
+            planets[i].update(scrollVelY);
             planets[i].draw();
           }
         }
@@ -667,9 +713,11 @@ export default function ParticleBackground() {
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchstart', handleTouch);
+      window.removeEventListener('touchmove', handleTouch);
       window.removeEventListener('scroll', checkScrollSection);
       window.removeEventListener('resize', handleResize);
-      clearTimeout(mouseTimeout);
+      clearTimeout(pointerTimeout);
     };
   }, []);
 

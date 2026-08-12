@@ -88,9 +88,13 @@ html.lenis, html.lenis body {
   color: inherit;
   transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.22s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
-.char-hover:hover {
+.char-hover:hover,
+.char-hover:active,
+.char-hover.char-hover-active {
   color: #FFD700 !important; /* Pure 24K Gold */
   text-shadow: 0 0 14px rgba(255, 215, 0, 0.95), 0 0 28px rgba(255, 195, 0, 0.8), 0 0 48px rgba(212, 175, 55, 0.6) !important;
   transform: translateY(-2.5px) scale(1.12);
