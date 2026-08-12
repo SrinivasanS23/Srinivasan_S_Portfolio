@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Sparkles } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import InteractiveTitle from './InteractiveTitle';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -15,206 +14,244 @@ export default function HeroSequence({ heroImages, mobileImages }) {
   const dollyRef = useRef(null);
   const morphRef = useRef(null);
   const subtitleRef = useRef(null);
+  const scrollHintRef = useRef(null);
+  const ctxRef = useRef(null);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [showSubtitle, setShowSubtitle] = useState(true);
 
   // TV Power & Terminal State
   const [tvPoweredOn, setTvPoweredOn] = useState(false);
-  const [terminalStage, setTerminalStage] = useState('off'); // 'off', 'powerOn', 'boot', 'clear', 'cmd1', 'out1', 'cmd2', 'out2', 'complete'
+  const [terminalStage, setTerminalStage] = useState('off');
   const [bootText, setBootText] = useState([]);
   const [cmd1Text, setCmd1Text] = useState('');
   const [out1Text, setOut1Text] = useState('');
   const [cmd2Text, setCmd2Text] = useState('');
   const [out2Text, setOut2Text] = useState('');
 
-  // 60 FPS Hardware-Accelerated Lerp Interpolation Refs
+  // Pure ref-driven animation state (zero React re-renders during scroll)
   const frameRef = useRef(0);
   const targetFrameRef = useRef(0);
   const lastRenderedFrameRef = useRef(-1);
-  const lastLoadedFrameRef = useRef(0);
   const animFrameIdRef = useRef(null);
   const scrollProgRef = useRef(0);
+  const canvasSizeRef = useRef({ w: 0, h: 0 });
+
+  // Track which images are confirmed loaded for instant access
+  const loadedSetRef = useRef(new Set());
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const activeImages = isMobile && mobileImages && mobileImages.length > 0 ? mobileImages : heroImages;
 
-  // Search for the closest loaded frame to eliminate any black screens or missing visuals
-  const getNearestLoadedImage = (primaryImages, fallbackImages, targetIndex) => {
-    const list = primaryImages && primaryImages.length > 0 ? primaryImages : fallbackImages;
-    if (!list || list.length === 0) return null;
+  // Build loaded-set whenever activeImages changes
+  useEffect(() => {
+    if (!activeImages || activeImages.length === 0) return;
+    const set = loadedSetRef.current;
+    set.clear();
 
-    const target = Math.max(0, Math.min(TOTAL_HERO_FRAMES - 1, Math.round(targetIndex)));
-
-    // 1. Direct hit on target
-    if (list[target] && list[target].complete && list[target].naturalWidth > 0) {
-      return { img: list[target], index: target };
-    }
-
-    // 2. Search outward in primary list
-    for (let offset = 1; offset < 40; offset++) {
-      const prev = target - offset;
-      if (prev >= 0 && list[prev] && list[prev].complete && list[prev].naturalWidth > 0) {
-        return { img: list[prev], index: prev };
-      }
-      const next = target + offset;
-      if (next < list.length && list[next] && list[next].complete && list[next].naturalWidth > 0) {
-        return { img: list[next], index: next };
-      }
-    }
-
-    // 3. Fallback to alternate list (e.g. desktop frames if on mobile)
-    const fallbackList = fallbackImages && fallbackImages.length > 0 ? fallbackImages : null;
-    if (fallbackList) {
-      for (let offset = 0; offset < 40; offset++) {
-        const prev = target - offset;
-        if (prev >= 0 && fallbackList[prev] && fallbackList[prev].complete && fallbackList[prev].naturalWidth > 0) {
-          return { img: fallbackList[prev], index: prev };
+    const checkAll = () => {
+      for (let i = 0; i < activeImages.length; i++) {
+        const img = activeImages[i];
+        if (img && img.complete && img.naturalWidth > 0) {
+          set.add(i);
         }
       }
+    };
+
+    checkAll();
+
+    // Listen for late-loading frames
+    const handlers = [];
+    for (let i = 0; i < activeImages.length; i++) {
+      const img = activeImages[i];
+      if (img && !set.has(i)) {
+        const handler = () => {
+          if (img.naturalWidth > 0) set.add(i);
+        };
+        img.addEventListener('load', handler);
+        handlers.push({ img, handler });
+      }
     }
 
-    // 4. Any loaded frame
-    for (let i = 0; i < list.length; i++) {
-      if (list[i] && list[i].complete && list[i].naturalWidth > 0) {
-        return { img: list[i], index: i };
-      }
+    // Periodic sweep for any missed loads
+    const interval = setInterval(checkAll, 500);
+
+    return () => {
+      clearInterval(interval);
+      handlers.forEach(({ img, handler }) => img.removeEventListener('load', handler));
+    };
+  }, [activeImages]);
+
+  // Find the best available frame (instant O(1) lookup with fallback search)
+  const getBestFrame = useCallback((targetIndex) => {
+    if (!activeImages || activeImages.length === 0) return null;
+    const set = loadedSetRef.current;
+    const target = Math.max(0, Math.min(TOTAL_HERO_FRAMES - 1, Math.round(targetIndex)));
+
+    // Direct hit
+    if (set.has(target)) return activeImages[target];
+
+    // Search outward ±1, ±2, ±3... up to ±50
+    for (let offset = 1; offset <= 50; offset++) {
+      const prev = target - offset;
+      if (prev >= 0 && set.has(prev)) return activeImages[prev];
+      const next = target + offset;
+      if (next < activeImages.length && set.has(next)) return activeImages[next];
+    }
+
+    // Last resort: any loaded frame
+    for (const idx of set) {
+      return activeImages[idx];
     }
 
     return null;
-  };
+  }, [activeImages]);
 
-  // Render Frame directly to canvas with aspect-ratio cover
-  const renderFrame = (index) => {
+  // Render a single frame to canvas (optimized: cached ctx, cover-fit math)
+  const renderFrame = useCallback((index) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const match = getNearestLoadedImage(activeImages, isMobile ? heroImages : mobileImages, index);
-    if (!match || !match.img) return;
-    const img = match.img;
-
-    const ctx = canvas.getContext('2d');
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
-    if (canvasWidth === 0 || canvasHeight === 0) return;
-
-    const imgWidth = img.naturalWidth || img.width;
-    const imgHeight = img.naturalHeight || img.height;
-    if (imgWidth === 0 || imgHeight === 0) return;
-
-    const imgRatio = imgWidth / imgHeight;
-    const canvasRatio = canvasWidth / canvasHeight;
-
-    let drawWidth, drawHeight, offsetX, offsetY;
-
-    if (canvasRatio > imgRatio) {
-      drawWidth = canvasWidth;
-      drawHeight = canvasWidth / imgRatio;
-      offsetX = 0;
-      offsetY = (canvasHeight - drawHeight) / 2;
-    } else {
-      drawWidth = canvasHeight * imgRatio;
-      drawHeight = canvasHeight;
-      offsetX = (canvasWidth - drawWidth) / 2;
-      offsetY = 0;
+    let ctx = ctxRef.current;
+    if (!ctx) {
+      ctx = canvas.getContext('2d', { alpha: false });
+      ctxRef.current = ctx;
     }
 
-    // Direct draw without clearRect to prevent black flash glitch
-    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-    lastRenderedFrameRef.current = match.index;
-  };
+    const img = getBestFrame(index);
+    if (!img) return;
 
-  // High-Performance 60 FPS Animation & Render Loop
+    const { w: cw, h: ch } = canvasSizeRef.current;
+    if (cw === 0 || ch === 0) return;
+
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    if (!iw || !ih) return;
+
+    // Cover-fit calculation
+    const imgRatio = iw / ih;
+    const canvasRatio = cw / ch;
+
+    let dw, dh, ox, oy;
+    if (canvasRatio > imgRatio) {
+      dw = cw;
+      dh = cw / imgRatio;
+      ox = 0;
+      oy = (ch - dh) / 2;
+    } else {
+      dw = ch * imgRatio;
+      dh = ch;
+      ox = (cw - dw) / 2;
+      oy = 0;
+    }
+
+    ctx.drawImage(img, ox, oy, dw, dh);
+    lastRenderedFrameRef.current = Math.round(index);
+  }, [getBestFrame]);
+
+  // ─── 60 FPS Hardware-Accelerated Render Loop ───
   useEffect(() => {
     let isRunning = true;
 
-    const updateLoop = () => {
+    const tick = () => {
       if (!isRunning) return;
 
+      // Smooth exponential lerp: slower factor = smoother motion
       const current = frameRef.current;
       const target = targetFrameRef.current;
       const diff = target - current;
 
-      // Smooth buttery lerp convergence
-      if (Math.abs(diff) > 0.02) {
-        frameRef.current = current + diff * 0.28;
+      if (Math.abs(diff) > 0.05) {
+        // Use a gentler lerp (0.12) for silky smooth scrubbing
+        frameRef.current = current + diff * 0.12;
       } else {
         frameRef.current = target;
       }
 
-      const roundedFrame = Math.round(frameRef.current);
-      if (roundedFrame !== lastRenderedFrameRef.current) {
-        renderFrame(roundedFrame);
+      // Only redraw when the visible frame actually changes
+      const visibleFrame = Math.round(frameRef.current);
+      if (visibleFrame !== lastRenderedFrameRef.current) {
+        renderFrame(visibleFrame);
       }
 
-      // Smooth Dolly Zoom transform without React state re-render
+      // ─── Direct DOM transforms (zero React re-renders) ───
+
+      const progress = scrollProgRef.current;
+
+      // Dolly zoom
       if (dollyRef.current) {
-        const progress = scrollProgRef.current;
-        const zoomProgress = Math.max(0, (progress - 0.93) / 0.07);
-        const tvScale = 1 + Math.pow(zoomProgress, 2) * 11;
-        const origin = isMobile ? '34% 38%' : '25.5% 37.0%';
-        dollyRef.current.style.transform = `scale(${tvScale})`;
-        dollyRef.current.style.transformOrigin = origin;
+        const zp = Math.max(0, (progress - 0.93) / 0.07);
+        const scale = 1 + zp * zp * 11;
+        dollyRef.current.style.transform = `scale(${scale})`;
+        dollyRef.current.style.transformOrigin = isMobile ? '34% 38%' : '25.5% 37.0%';
       }
 
-      // Seamless TV morph transition overlay
+      // Morph overlay
       if (morphRef.current) {
-        const progress = scrollProgRef.current;
-        const morphOpacity = Math.min(1, Math.max(0, (progress - 0.97) * 35));
-        morphRef.current.style.opacity = morphOpacity;
+        const mo = Math.min(1, Math.max(0, (progress - 0.97) * 35));
+        morphRef.current.style.opacity = mo;
       }
 
-      // Smooth Subtitle Fade & Float without re-rendering
+      // Subtitle fade
       if (subtitleRef.current) {
-        const progress = scrollProgRef.current;
-        const subOpacity = Math.max(0, 1 - progress * 6.5);
-        const subY = progress * -30;
-        subtitleRef.current.style.opacity = subOpacity;
-        subtitleRef.current.style.transform = `translate(-50%, ${subY}px)`;
-        subtitleRef.current.style.display = subOpacity <= 0.01 ? 'none' : 'block';
+        const so = Math.max(0, 1 - progress * 6.5);
+        subtitleRef.current.style.opacity = so;
+        subtitleRef.current.style.transform = `translate(-50%, ${progress * -30}px)`;
+        subtitleRef.current.style.display = so <= 0.01 ? 'none' : 'block';
       }
 
-      animFrameIdRef.current = requestAnimationFrame(updateLoop);
+      // Scroll hint fade
+      if (scrollHintRef.current) {
+        const ho = Math.max(0, 1 - progress * 8);
+        scrollHintRef.current.style.opacity = ho;
+        scrollHintRef.current.style.display = ho <= 0.01 ? 'none' : 'flex';
+      }
+
+      animFrameIdRef.current = requestAnimationFrame(tick);
     };
 
-    animFrameIdRef.current = requestAnimationFrame(updateLoop);
+    animFrameIdRef.current = requestAnimationFrame(tick);
 
     return () => {
       isRunning = false;
-      if (animFrameIdRef.current) {
-        cancelAnimationFrame(animFrameIdRef.current);
-      }
+      if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
     };
-  }, [activeImages, isMobile]);
+  }, [activeImages, isMobile, renderFrame]);
 
-  // Handle Resize and Initial Render
+  // ─── Canvas Sizing (use 1x DPR on mobile for performance) ───
   useEffect(() => {
-    const handleResize = () => {
+    const sizeCanvas = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+      // Use lower DPR on mobile to keep frame draws fast
+      const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+      const w = window.innerWidth * dpr;
+      const h = window.innerHeight * dpr;
+      canvas.width = w;
+      canvas.height = h;
+      canvasSizeRef.current = { w, h };
+      // Reset ctx after resize (canvas resize clears context)
+      ctxRef.current = null;
       renderFrame(Math.round(frameRef.current));
     };
 
-    handleResize();
-    const timer = setTimeout(handleResize, 100);
-    window.addEventListener('resize', handleResize);
+    sizeCanvas();
+    // Deferred re-draw to catch late-loading first frame
+    const t1 = setTimeout(sizeCanvas, 150);
+    const t2 = setTimeout(sizeCanvas, 600);
+    window.addEventListener('resize', sizeCanvas);
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', handleResize);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener('resize', sizeCanvas);
     };
-  }, [activeImages]);
+  }, [activeImages, isMobile, renderFrame]);
 
-  // GSAP ScrollTrigger Binding
+  // ─── GSAP ScrollTrigger ───
   useEffect(() => {
     if (!activeImages || activeImages.length === 0) return;
 
@@ -232,31 +269,18 @@ export default function HeroSequence({ heroImages, mobileImages }) {
       start: 'top top',
       end: '+=600%',
       pin: true,
-      scrub: 0.15,
+      scrub: 0.6,  // Smoother scrub (higher = more smoothing between scroll and progress)
       onUpdate: (self) => {
         const progress = self.progress;
         scrollProgRef.current = progress;
 
-        const targetFrame = Math.min(
+        // Map progress to target frame index
+        targetFrameRef.current = Math.min(
           TOTAL_HERO_FRAMES - 1,
           Math.floor(progress * (TOTAL_HERO_FRAMES - 1))
         );
-        targetFrameRef.current = targetFrame;
 
-        // Subtitle visibility
-        const shouldShowSubtitle = progress < 0.18;
-        setShowSubtitle((prev) => (prev !== shouldShowSubtitle ? shouldShowSubtitle : prev));
-
-        // -------------------------------------------------------------------------
-        // STORY TIMING BEATS:
-        // 0.00 - 0.73: Room -> Enters -> Sits -> Laptop Opens -> Hands on Keys (TV OFF)
-        // 0.73 - 0.75: First Key Press -> TV Powers ON -> Blinking Cursor Only (1.0s Pause)
-        // 0.75 - 0.83: Slower Boot Sequence ($ boot, SYSTEM INITIALIZING... -> READY)
-        // 0.83 - 0.85: Smooth Screen Clear & 700ms Pause
-        // 0.85 - 0.93: Slower Command Typing ($ whoami -> HI I AM SRINIVASAN -> $ profession -> I AM A PYTHON FULL-STACK DEVELOPER)
-        // 0.93 - 1.00: Camera Dollies into TV Screen -> Morph into About Section
-        // -------------------------------------------------------------------------
-
+        // ── Terminal Story Beats (only update state when stage changes) ──
         if (progress < 0.73) {
           if (prevStage !== 'off') {
             prevStage = 'off';
@@ -268,7 +292,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
             setCmd2Text('');
             setOut2Text('');
           }
-        } else if (progress >= 0.73 && progress < 0.75) {
+        } else if (progress < 0.75) {
           if (prevStage !== 'powerOn') {
             prevStage = 'powerOn';
             setTvPoweredOn(true);
@@ -279,7 +303,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
             setCmd2Text('');
             setOut2Text('');
           }
-        } else if (progress >= 0.75 && progress < 0.83) {
+        } else if (progress < 0.83) {
           const bootProg = (progress - 0.75) / 0.08;
           const bootLines = [
             "$ boot",
@@ -301,7 +325,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
             setCmd2Text('');
             setOut2Text('');
           }
-        } else if (progress >= 0.83 && progress < 0.85) {
+        } else if (progress < 0.85) {
           if (prevStage !== 'clear') {
             prevStage = 'clear';
             setTvPoweredOn(true);
@@ -312,7 +336,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
             setCmd2Text('');
             setOut2Text('');
           }
-        } else if (progress >= 0.85) {
+        } else {
           const typeProg = Math.min(1, (progress - 0.85) / 0.08);
           const cmd1 = "whoami";
           const out1 = "HI I AM SRINIVASAN";
@@ -325,58 +349,40 @@ export default function HeroSequence({ heroImages, mobileImages }) {
             const c1 = Math.floor((typeProg / 0.25) * cmd1.length);
             const text = cmd1.slice(0, c1);
             if (prevStage !== 'cmd1' || prevCmd1 !== text) {
-              prevStage = 'cmd1';
-              prevCmd1 = text;
+              prevStage = 'cmd1'; prevCmd1 = text;
               setTerminalStage('cmd1');
-              setCmd1Text(text);
-              setOut1Text('');
-              setCmd2Text('');
-              setOut2Text('');
+              setCmd1Text(text); setOut1Text(''); setCmd2Text(''); setOut2Text('');
             }
           } else if (typeProg <= 0.50) {
             const o1 = Math.floor(((typeProg - 0.25) / 0.25) * out1.length);
             const text = out1.slice(0, o1);
             if (prevStage !== 'out1' || prevOut1 !== text) {
-              prevStage = 'out1';
-              prevOut1 = text;
+              prevStage = 'out1'; prevOut1 = text;
               setTerminalStage('out1');
-              setCmd1Text(cmd1);
-              setOut1Text(text);
-              setCmd2Text('');
-              setOut2Text('');
+              setCmd1Text(cmd1); setOut1Text(text); setCmd2Text(''); setOut2Text('');
             }
           } else if (typeProg <= 0.75) {
             const c2 = Math.floor(((typeProg - 0.50) / 0.25) * cmd2.length);
             const text = cmd2.slice(0, c2);
             if (prevStage !== 'cmd2' || prevCmd2 !== text) {
-              prevStage = 'cmd2';
-              prevCmd2 = text;
+              prevStage = 'cmd2'; prevCmd2 = text;
               setTerminalStage('cmd2');
-              setCmd1Text(cmd1);
-              setOut1Text(out1);
-              setCmd2Text(text);
-              setOut2Text('');
+              setCmd1Text(cmd1); setOut1Text(out1); setCmd2Text(text); setOut2Text('');
             }
           } else {
             const o2 = Math.floor(((typeProg - 0.75) / 0.25) * out2.length);
             const text = out2.slice(0, o2);
             if (prevStage !== 'complete' || prevOut2 !== text) {
-              prevStage = 'complete';
-              prevOut2 = text;
+              prevStage = 'complete'; prevOut2 = text;
               setTerminalStage('complete');
-              setCmd1Text(cmd1);
-              setOut1Text(out1);
-              setCmd2Text(cmd2);
-              setOut2Text(text);
+              setCmd1Text(cmd1); setOut1Text(out1); setCmd2Text(cmd2); setOut2Text(text);
             }
           }
         }
       }
     });
 
-    return () => {
-      trigger.kill();
-    };
+    return () => trigger.kill();
   }, [activeImages]);
 
   return (
@@ -451,51 +457,37 @@ export default function HeroSequence({ heroImages, mobileImages }) {
             }}
           >
             {/* Layer 1: Dark OLED Screen Surface */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundColor: '#050505',
-                zIndex: 1
-              }}
-            />
+            <div style={{ position: 'absolute', inset: 0, backgroundColor: '#050505', zIndex: 1 }} />
 
             {/* Layer 2: Glossy OLED Glass Reflection */}
             <div
               style={{
-                position: 'absolute',
-                inset: 0,
+                position: 'absolute', inset: 0,
                 background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 40%, transparent 60%)',
-                zIndex: 10,
-                pointerEvents: 'none'
+                zIndex: 10, pointerEvents: 'none'
               }}
             />
 
             {/* Layer 3: CRT Scanlines */}
             <div
               style={{
-                position: 'absolute',
-                inset: 0,
+                position: 'absolute', inset: 0,
                 background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%)',
                 backgroundSize: '100% 3px',
-                zIndex: 9,
-                pointerEvents: 'none',
-                opacity: 0.3
+                zIndex: 9, pointerEvents: 'none', opacity: 0.3
               }}
             />
 
             {/* Layer 4: Screen Edge Vignette */}
             <div
               style={{
-                position: 'absolute',
-                inset: 0,
+                position: 'absolute', inset: 0,
                 background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.85) 100%)',
-                zIndex: 11,
-                pointerEvents: 'none'
+                zIndex: 11, pointerEvents: 'none'
               }}
             />
 
-            {/* Layer 5: Terminal Content Mapped to Projected Trapezoid Surface */}
+            {/* Layer 5: Terminal Content */}
             <div
               style={{
                 position: 'relative',
@@ -563,11 +555,8 @@ export default function HeroSequence({ heroImages, mobileImages }) {
                   {out1Text && (
                     <div
                       style={{
-                        color: '#BCAC93',
-                        fontWeight: '800',
-                        fontSize: '1.05em',
-                        marginTop: '2px',
-                        marginBottom: '4px',
+                        color: '#BCAC93', fontWeight: '800', fontSize: '1.05em',
+                        marginTop: '2px', marginBottom: '4px',
                         textShadow: '0 0 8px rgba(188, 172, 147, 0.85)'
                       }}
                     >
@@ -587,9 +576,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
                   {out2Text && (
                     <div
                       style={{
-                        color: '#BCAC93',
-                        fontWeight: '800',
-                        fontSize: '1.05em',
+                        color: '#BCAC93', fontWeight: '800', fontSize: '1.05em',
                         marginTop: '2px',
                         textShadow: '0 0 8px rgba(188, 172, 147, 0.85)',
                         whiteSpace: 'pre-line'
@@ -606,7 +593,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
         )}
       </div>
 
-      {/* Hero Story Subtitles: Smooth Ref-Driven Non-Flickering Fade */}
+      {/* Hero Story Subtitles */}
       <div
         ref={subtitleRef}
         style={{
@@ -619,8 +606,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
           pointerEvents: 'none',
           width: '90%',
           maxWidth: '680px',
-          willChange: 'opacity, transform',
-          transition: 'opacity 0.1s linear'
+          willChange: 'opacity, transform'
         }}
       >
         <h1
@@ -647,10 +633,8 @@ export default function HeroSequence({ heroImages, mobileImages }) {
         ref={morphRef}
         style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
+          top: 0, left: 0,
+          width: '100%', height: '100%',
           backgroundColor: '#08080A',
           opacity: 0,
           pointerEvents: 'none',
@@ -659,9 +643,8 @@ export default function HeroSequence({ heroImages, mobileImages }) {
       />
 
       {/* Bottom Scroll Down Hint */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+      <div
+        ref={scrollHintRef}
         style={{
           position: 'absolute',
           bottom: '2.5rem',
@@ -676,12 +659,13 @@ export default function HeroSequence({ heroImages, mobileImages }) {
           fontFamily: "'Fira Code', monospace",
           fontSize: '0.8rem',
           letterSpacing: '0.1em',
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          animation: 'scrollBounce 2s ease-in-out infinite'
         }}
       >
         <span>SCROLL DOWN</span>
         <ChevronDown size={18} color="#BCAC93" />
-      </motion.div>
+      </div>
 
       {/* Retro OLED CSS Styles */}
       <style>{`
@@ -690,9 +674,9 @@ export default function HeroSequence({ heroImages, mobileImages }) {
           50% { opacity: 0.8; filter: brightness(1.8); }
           100% { opacity: 1; filter: brightness(1); }
         }
-        @keyframes subtleFlicker {
-          0% { opacity: 0.97; }
-          100% { opacity: 1; }
+        @keyframes scrollBounce {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50% { transform: translateX(-50%) translateY(10px); }
         }
         .oled-cursor {
           display: inline-block;
