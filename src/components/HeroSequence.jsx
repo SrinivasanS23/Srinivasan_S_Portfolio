@@ -36,9 +36,6 @@ export default function HeroSequence({ heroImages, mobileImages }) {
   const scrollProgRef = useRef(0);
   const canvasSizeRef = useRef({ w: 0, h: 0 });
 
-  // Track which images are confirmed loaded for instant access
-  const loadedSetRef = useRef(new Set());
-
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', checkMobile);
@@ -47,71 +44,57 @@ export default function HeroSequence({ heroImages, mobileImages }) {
 
   const activeImages = isMobile && mobileImages && mobileImages.length > 0 ? mobileImages : heroImages;
 
-  // Build loaded-set whenever activeImages changes
-  useEffect(() => {
-    if (!activeImages || activeImages.length === 0) return;
-    const set = loadedSetRef.current;
-    set.clear();
 
-    const checkAll = () => {
-      for (let i = 0; i < activeImages.length; i++) {
-        const img = activeImages[i];
-        if (img && img.complete && img.naturalWidth > 0) {
-          set.add(i);
-        }
-      }
-    };
+  // Last successfully drawn image (absolute guarantee against blank canvas)
+  const lastGoodImageRef = useRef(null);
 
-    checkAll();
-
-    // Listen for late-loading frames
-    const handlers = [];
-    for (let i = 0; i < activeImages.length; i++) {
-      const img = activeImages[i];
-      if (img && !set.has(i)) {
-        const handler = () => {
-          if (img.naturalWidth > 0) set.add(i);
-        };
-        img.addEventListener('load', handler);
-        handlers.push({ img, handler });
-      }
-    }
-
-    // Periodic sweep for any missed loads
-    const interval = setInterval(checkAll, 500);
-
-    return () => {
-      clearInterval(interval);
-      handlers.forEach(({ img, handler }) => img.removeEventListener('load', handler));
-    };
-  }, [activeImages]);
-
-  // Find the best available frame (instant O(1) lookup with fallback search)
+  // Find the best available frame with REAL-TIME .complete checking
+  // This bypasses the Set entirely when needed, ensuring zero missing frames
   const getBestFrame = useCallback((targetIndex) => {
-    if (!activeImages || activeImages.length === 0) return null;
-    const set = loadedSetRef.current;
+    if (!activeImages || activeImages.length === 0) return lastGoodImageRef.current;
     const target = Math.max(0, Math.min(TOTAL_HERO_FRAMES - 1, Math.round(targetIndex)));
 
-    // Direct hit
-    if (set.has(target)) return activeImages[target];
+    // 1. Direct hit - check .complete in real time (not from cached Set)
+    const directImg = activeImages[target];
+    if (directImg && directImg.complete && directImg.naturalWidth > 0) {
+      lastGoodImageRef.current = directImg;
+      return directImg;
+    }
 
-    // Search outward ±1, ±2, ±3... up to ±50
-    for (let offset = 1; offset <= 50; offset++) {
+    // 2. Search outward ±1..±80 with real-time .complete check
+    for (let offset = 1; offset <= 80; offset++) {
       const prev = target - offset;
-      if (prev >= 0 && set.has(prev)) return activeImages[prev];
+      if (prev >= 0) {
+        const img = activeImages[prev];
+        if (img && img.complete && img.naturalWidth > 0) {
+          lastGoodImageRef.current = img;
+          return img;
+        }
+      }
       const next = target + offset;
-      if (next < activeImages.length && set.has(next)) return activeImages[next];
+      if (next < activeImages.length) {
+        const img = activeImages[next];
+        if (img && img.complete && img.naturalWidth > 0) {
+          lastGoodImageRef.current = img;
+          return img;
+        }
+      }
     }
 
-    // Last resort: any loaded frame
-    for (const idx of set) {
-      return activeImages[idx];
+    // 3. Fall back to any loaded frame in the entire array
+    for (let i = 0; i < activeImages.length; i++) {
+      const img = activeImages[i];
+      if (img && img.complete && img.naturalWidth > 0) {
+        lastGoodImageRef.current = img;
+        return img;
+      }
     }
 
-    return null;
+    // 4. Absolute last resort: return the last successfully drawn image
+    return lastGoodImageRef.current;
   }, [activeImages]);
 
-  // Render a single frame to canvas (optimized: cached ctx, cover-fit math)
+  // Render a single frame to canvas (optimized: cached ctx, cover-fit)
   const renderFrame = useCallback((index) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
