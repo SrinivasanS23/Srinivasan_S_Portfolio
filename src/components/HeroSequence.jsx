@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Sparkles } from 'lucide-react';
+import InteractiveTitle from './InteractiveTitle';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,11 +12,13 @@ const TOTAL_HERO_FRAMES = 300;
 export default function HeroSequence({ heroImages, mobileImages }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
-  const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const dollyRef = useRef(null);
+  const morphRef = useRef(null);
 
-  // TV Power & Terminal State Machine
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showSubtitle, setShowSubtitle] = useState(true);
+
+  // TV Power & Terminal State
   const [tvPoweredOn, setTvPoweredOn] = useState(false);
   const [terminalStage, setTerminalStage] = useState('off'); // 'off', 'powerOn', 'boot', 'clear', 'cmd1', 'out1', 'cmd2', 'out2', 'complete'
   const [bootText, setBootText] = useState([]);
@@ -23,6 +26,14 @@ export default function HeroSequence({ heroImages, mobileImages }) {
   const [out1Text, setOut1Text] = useState('');
   const [cmd2Text, setCmd2Text] = useState('');
   const [out2Text, setOut2Text] = useState('');
+
+  // 60 FPS Hardware-Accelerated Lerp Interpolation Refs
+  const frameRef = useRef(0);
+  const targetFrameRef = useRef(0);
+  const lastRenderedFrameRef = useRef(-1);
+  const lastLoadedFrameRef = useRef(0);
+  const animFrameIdRef = useRef(null);
+  const scrollProgRef = useRef(0);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -34,18 +45,23 @@ export default function HeroSequence({ heroImages, mobileImages }) {
 
   const activeImages = isMobile && mobileImages && mobileImages.length > 0 ? mobileImages : heroImages;
 
-  // Render Canvas Frame
+  // Render Frame directly to canvas with aspect-ratio cover
   const renderFrame = (index) => {
     const canvas = canvasRef.current;
-    if (!canvas || !activeImages || !activeImages[index]) return;
-    const ctx = canvas.getContext('2d');
-    const img = activeImages[index];
+    if (!canvas || !activeImages || activeImages.length === 0) return;
 
-    if (!img.complete) {
-      img.onload = () => renderFrame(index);
-      return;
+    const clampedIndex = Math.max(0, Math.min(TOTAL_HERO_FRAMES - 1, Math.round(index)));
+    let img = activeImages[clampedIndex];
+
+    // Fallback to nearest loaded frame if current frame is loading to eliminate blank canvas
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      img = activeImages[lastLoadedFrameRef.current] || activeImages[0];
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+    } else {
+      lastLoadedFrameRef.current = clampedIndex;
     }
 
+    const ctx = canvas.getContext('2d');
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
     const imgWidth = img.naturalWidth || img.width;
@@ -70,8 +86,63 @@ export default function HeroSequence({ heroImages, mobileImages }) {
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+    lastRenderedFrameRef.current = clampedIndex;
   };
 
+  // High-Performance 60 FPS Animation & Render Loop
+  useEffect(() => {
+    let isRunning = true;
+
+    const updateLoop = () => {
+      if (!isRunning) return;
+
+      const current = frameRef.current;
+      const target = targetFrameRef.current;
+      const diff = target - current;
+
+      // Smooth buttery lerp convergence
+      if (Math.abs(diff) > 0.02) {
+        frameRef.current = current + diff * 0.28;
+      } else {
+        frameRef.current = target;
+      }
+
+      const roundedFrame = Math.round(frameRef.current);
+      if (roundedFrame !== lastRenderedFrameRef.current) {
+        renderFrame(roundedFrame);
+      }
+
+      // Smooth Dolly Zoom transform without React state re-render
+      if (dollyRef.current) {
+        const progress = scrollProgRef.current;
+        const zoomProgress = Math.max(0, (progress - 0.93) / 0.07);
+        const tvScale = 1 + Math.pow(zoomProgress, 2) * 11;
+        const origin = isMobile ? '34% 38%' : '25.5% 37.0%';
+        dollyRef.current.style.transform = `scale(${tvScale})`;
+        dollyRef.current.style.transformOrigin = origin;
+      }
+
+      // Seamless TV morph transition overlay
+      if (morphRef.current) {
+        const progress = scrollProgRef.current;
+        const morphOpacity = Math.min(1, Math.max(0, (progress - 0.97) * 35));
+        morphRef.current.style.opacity = morphOpacity;
+      }
+
+      animFrameIdRef.current = requestAnimationFrame(updateLoop);
+    };
+
+    animFrameIdRef.current = requestAnimationFrame(updateLoop);
+
+    return () => {
+      isRunning = false;
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+      }
+    };
+  }, [activeImages, isMobile]);
+
+  // Handle Resize
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
@@ -79,40 +150,46 @@ export default function HeroSequence({ heroImages, mobileImages }) {
       const dpr = window.devicePixelRatio || 1;
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
-      renderFrame(currentFrameIndex);
+      renderFrame(Math.round(frameRef.current));
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [activeImages, currentFrameIndex]);
+  }, [activeImages]);
 
-  useEffect(() => {
-    renderFrame(currentFrameIndex);
-  }, [currentFrameIndex, activeImages]);
-
-  // GSAP ScrollTrigger Binding with Cinematic Timing
+  // GSAP ScrollTrigger Binding
   useEffect(() => {
     if (!activeImages || activeImages.length === 0) return;
 
     const container = containerRef.current;
+
+    let prevStage = 'off';
+    let prevCmd1 = '';
+    let prevOut1 = '';
+    let prevCmd2 = '';
+    let prevOut2 = '';
+    let prevBootLinesCount = 0;
 
     const trigger = ScrollTrigger.create({
       trigger: container,
       start: 'top top',
       end: '+=600%',
       pin: true,
-      scrub: 0.2,
+      scrub: 0.15,
       onUpdate: (self) => {
         const progress = self.progress;
-        setScrollProgress(progress);
+        scrollProgRef.current = progress;
 
         const targetFrame = Math.min(
           TOTAL_HERO_FRAMES - 1,
           Math.floor(progress * (TOTAL_HERO_FRAMES - 1))
         );
-        setCurrentFrameIndex(targetFrame);
-        renderFrame(targetFrame);
+        targetFrameRef.current = targetFrame;
+
+        // Subtitle visibility
+        const shouldShowSubtitle = progress < 0.18;
+        setShowSubtitle((prev) => (prev !== shouldShowSubtitle ? shouldShowSubtitle : prev));
 
         // -------------------------------------------------------------------------
         // STORY TIMING BEATS:
@@ -125,24 +202,28 @@ export default function HeroSequence({ heroImages, mobileImages }) {
         // -------------------------------------------------------------------------
 
         if (progress < 0.73) {
-          setTvPoweredOn(false);
-          setTerminalStage('off');
-          setBootText([]);
-          setCmd1Text('');
-          setOut1Text('');
-          setCmd2Text('');
-          setOut2Text('');
+          if (prevStage !== 'off') {
+            prevStage = 'off';
+            setTvPoweredOn(false);
+            setTerminalStage('off');
+            setBootText([]);
+            setCmd1Text('');
+            setOut1Text('');
+            setCmd2Text('');
+            setOut2Text('');
+          }
         } else if (progress >= 0.73 && progress < 0.75) {
-          setTvPoweredOn(true);
-          setTerminalStage('powerOn');
-          setBootText([]);
-          setCmd1Text('');
-          setOut1Text('');
-          setCmd2Text('');
-          setOut2Text('');
+          if (prevStage !== 'powerOn') {
+            prevStage = 'powerOn';
+            setTvPoweredOn(true);
+            setTerminalStage('powerOn');
+            setBootText([]);
+            setCmd1Text('');
+            setOut1Text('');
+            setCmd2Text('');
+            setOut2Text('');
+          }
         } else if (progress >= 0.75 && progress < 0.83) {
-          setTvPoweredOn(true);
-          setTerminalStage('boot');
           const bootProg = (progress - 0.75) / 0.08;
           const bootLines = [
             "$ boot",
@@ -153,57 +234,85 @@ export default function HeroSequence({ heroImages, mobileImages }) {
             "READY"
           ];
           const visibleCount = Math.min(6, Math.floor(bootProg * 6.5));
-          setBootText(bootLines.slice(0, visibleCount));
-          setCmd1Text('');
-          setOut1Text('');
-          setCmd2Text('');
-          setOut2Text('');
+          if (prevStage !== 'boot' || prevBootLinesCount !== visibleCount) {
+            prevStage = 'boot';
+            prevBootLinesCount = visibleCount;
+            setTvPoweredOn(true);
+            setTerminalStage('boot');
+            setBootText(bootLines.slice(0, visibleCount));
+            setCmd1Text('');
+            setOut1Text('');
+            setCmd2Text('');
+            setOut2Text('');
+          }
         } else if (progress >= 0.83 && progress < 0.85) {
-          setTvPoweredOn(true);
-          setTerminalStage('clear');
-          setBootText([]);
-          setCmd1Text('');
-          setOut1Text('');
-          setCmd2Text('');
-          setOut2Text('');
+          if (prevStage !== 'clear') {
+            prevStage = 'clear';
+            setTvPoweredOn(true);
+            setTerminalStage('clear');
+            setBootText([]);
+            setCmd1Text('');
+            setOut1Text('');
+            setCmd2Text('');
+            setOut2Text('');
+          }
         } else if (progress >= 0.85) {
-          setTvPoweredOn(true);
-          setBootText([]);
           const typeProg = Math.min(1, (progress - 0.85) / 0.08);
-
           const cmd1 = "whoami";
           const out1 = "HI I AM SRINIVASAN";
           const cmd2 = "profession";
           const out2 = "I AM A PYTHON FULL-STACK\nDEVELOPER";
 
+          setTvPoweredOn(true);
+
           if (typeProg <= 0.25) {
-            setTerminalStage('cmd1');
             const c1 = Math.floor((typeProg / 0.25) * cmd1.length);
-            setCmd1Text(cmd1.slice(0, c1));
-            setOut1Text('');
-            setCmd2Text('');
-            setOut2Text('');
+            const text = cmd1.slice(0, c1);
+            if (prevStage !== 'cmd1' || prevCmd1 !== text) {
+              prevStage = 'cmd1';
+              prevCmd1 = text;
+              setTerminalStage('cmd1');
+              setCmd1Text(text);
+              setOut1Text('');
+              setCmd2Text('');
+              setOut2Text('');
+            }
           } else if (typeProg <= 0.50) {
-            setCmd1Text(cmd1);
-            setTerminalStage('out1');
             const o1 = Math.floor(((typeProg - 0.25) / 0.25) * out1.length);
-            setOut1Text(out1.slice(0, o1));
-            setCmd2Text('');
-            setOut2Text('');
+            const text = out1.slice(0, o1);
+            if (prevStage !== 'out1' || prevOut1 !== text) {
+              prevStage = 'out1';
+              prevOut1 = text;
+              setTerminalStage('out1');
+              setCmd1Text(cmd1);
+              setOut1Text(text);
+              setCmd2Text('');
+              setOut2Text('');
+            }
           } else if (typeProg <= 0.75) {
-            setCmd1Text(cmd1);
-            setOut1Text(out1);
-            setTerminalStage('cmd2');
             const c2 = Math.floor(((typeProg - 0.50) / 0.25) * cmd2.length);
-            setCmd2Text(cmd2.slice(0, c2));
-            setOut2Text('');
+            const text = cmd2.slice(0, c2);
+            if (prevStage !== 'cmd2' || prevCmd2 !== text) {
+              prevStage = 'cmd2';
+              prevCmd2 = text;
+              setTerminalStage('cmd2');
+              setCmd1Text(cmd1);
+              setOut1Text(out1);
+              setCmd2Text(text);
+              setOut2Text('');
+            }
           } else {
-            setCmd1Text(cmd1);
-            setOut1Text(out1);
-            setCmd2Text(cmd2);
-            setTerminalStage('complete');
             const o2 = Math.floor(((typeProg - 0.75) / 0.25) * out2.length);
-            setOut2Text(out2.slice(0, o2));
+            const text = out2.slice(0, o2);
+            if (prevStage !== 'complete' || prevOut2 !== text) {
+              prevStage = 'complete';
+              prevOut2 = text;
+              setTerminalStage('complete');
+              setCmd1Text(cmd1);
+              setOut1Text(out1);
+              setCmd2Text(cmd2);
+              setOut2Text(text);
+            }
           }
         }
       }
@@ -213,11 +322,6 @@ export default function HeroSequence({ heroImages, mobileImages }) {
       trigger.kill();
     };
   }, [activeImages]);
-
-  // Camera Dolly Zoom pivoting directly on the 3D TV Screen Surface (progress 0.93 -> 1.00)
-  const zoomProgress = Math.max(0, (scrollProgress - 0.93) / 0.07);
-  const tvScale = 1 + Math.pow(zoomProgress, 2) * 11;
-  const morphOpacity = Math.min(1, Math.max(0, (scrollProgress - 0.97) * 35));
 
   return (
     <section
@@ -233,16 +337,14 @@ export default function HeroSequence({ heroImages, mobileImages }) {
     >
       {/* Dolly Zoom Container */}
       <div
+        ref={dollyRef}
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           width: '100%',
           height: '100%',
-          transform: `scale(${tvScale})`,
-          transformOrigin: isMobile ? '34% 38%' : '25.5% 37.0%',
-          willChange: 'transform',
-          transition: 'transform 0.08s linear'
+          willChange: 'transform'
         }}
       >
         {/* Rendered 3D Sequence Canvas */}
@@ -271,11 +373,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
           }}
         />
 
-        {/* --------------------------------------------------------------------------------------- */}
-        {/* 3D PERSPECTIVE TRAPEZOID MAPPED TERMINAL SURFACE                                        */}
-        {/* Mapped to the 4 corners of the physical TV display quad (TL, TR, BR, BL)                 */}
-        {/* Top-Left: (19.4%, 28.5%) | Top-Right: (31.6%, 28.2%) | BR: (31.4%, 45.4%) | BL: (19.6%, 45.8%) */}
-        {/* --------------------------------------------------------------------------------------- */}
+        {/* 3D PERSPECTIVE TRAPEZOID MAPPED TERMINAL SURFACE */}
         {tvPoweredOn && (
           <div
             className="tv-perspective-surface"
@@ -287,11 +385,9 @@ export default function HeroSequence({ heroImages, mobileImages }) {
               height: isMobile ? '18%' : '17.2%',
               overflow: 'hidden',
               perspective: '1000px',
-              // 3D Perspective matrix projection matching the camera angle & trapezoidal slant
               transform: isMobile
                 ? 'none'
                 : 'rotateY(10deg) rotateX(-1.5deg) skewY(-1deg)',
-              // Polygon clipping forming the exact trapezoid surface of the OLED screen
               clipPath: 'polygon(0% 1.8%, 100% 0%, 98.5% 97.5%, 1.5% 100%)',
               pointerEvents: 'none',
               zIndex: 25,
@@ -319,7 +415,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
               }}
             />
 
-            {/* Layer 3: CRT Scanlines (Subtle) */}
+            {/* Layer 3: CRT Scanlines */}
             <div
               style={{
                 position: 'absolute',
@@ -362,14 +458,12 @@ export default function HeroSequence({ heroImages, mobileImages }) {
                 animation: 'subtleFlicker 0.2s infinite alternate'
               }}
             >
-              {/* STAGE 1: POWER ON BLINKING CURSOR ONLY FOR 1.0s PAUSE */}
               {terminalStage === 'powerOn' && (
                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.8rem' }}>
                   <span className="oled-cursor">█</span>
                 </div>
               )}
 
-              {/* STAGE 2: BOOT SEQUENCE ($ boot, SYSTEM INITIALIZING...) */}
               {terminalStage === 'boot' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: isMobile ? '0.52rem' : '0.68rem' }}>
                   {bootText.map((line, idx) => (
@@ -388,14 +482,12 @@ export default function HeroSequence({ heroImages, mobileImages }) {
                 </div>
               )}
 
-              {/* STAGE 3: CLEAR PAUSE */}
               {terminalStage === 'clear' && (
                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.8rem' }}>
                   <span className="oled-cursor">█</span>
                 </div>
               )}
 
-              {/* STAGE 4: COMMAND TYPING ($ whoami & $ profession) */}
               {terminalStage !== 'off' && terminalStage !== 'powerOn' && terminalStage !== 'boot' && terminalStage !== 'clear' && (
                 <div
                   style={{
@@ -405,14 +497,12 @@ export default function HeroSequence({ heroImages, mobileImages }) {
                     wordBreak: 'break-word'
                   }}
                 >
-                  {/* $ whoami */}
                   <div>
                     <span style={{ color: '#BCAC93', fontWeight: 'bold' }}>$&nbsp;</span>
                     <span style={{ color: '#F9F9F9', fontWeight: '600' }}>{cmd1Text}</span>
                     {terminalStage === 'cmd1' && <span className="oled-cursor">█</span>}
                   </div>
 
-                  {/* HI I AM SRINIVASAN */}
                   {out1Text && (
                     <div
                       style={{
@@ -429,7 +519,6 @@ export default function HeroSequence({ heroImages, mobileImages }) {
                     </div>
                   )}
 
-                  {/* $ profession */}
                   {cmd2Text && (
                     <div>
                       <span style={{ color: '#BCAC93', fontWeight: 'bold' }}>$&nbsp;</span>
@@ -438,7 +527,6 @@ export default function HeroSequence({ heroImages, mobileImages }) {
                     </div>
                   )}
 
-                  {/* I AM A PYTHON FULL-STACK DEVELOPER */}
                   {out2Text && (
                     <div
                       style={{
@@ -463,55 +551,36 @@ export default function HeroSequence({ heroImages, mobileImages }) {
 
       {/* Hero Story Subtitles */}
       <AnimatePresence>
-        {scrollProgress < 0.20 && (
+        {showSubtitle && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -30 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
             style={{
               position: 'absolute',
-              bottom: isMobile ? '16%' : '14%',
-              right: isMobile ? '5%' : '8%',
-              maxWidth: '550px',
-              color: '#FFFFFF',
-              zIndex: 10,
-              textAlign: 'right',
-              pointerEvents: 'none'
+              bottom: '10vh',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              textAlign: 'center',
+              zIndex: 30,
+              pointerEvents: 'none',
+              width: '90%',
+              maxWidth: '680px'
             }}
           >
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: '#BCAC93',
-                fontSize: '0.8rem',
-                fontFamily: "'Fira Code', monospace",
-                marginBottom: '0.75rem',
-                background: 'rgba(28, 28, 30, 0.75)',
-                padding: '6px 16px',
-                borderRadius: '20px',
-                border: '1px solid rgba(188, 172, 147, 0.45)'
-              }}
-            >
-              <Sparkles size={14} /> CINEMATIC STORY EXPERIENCE
-            </motion.div>
             <h1
               style={{
                 fontFamily: "'Array', sans-serif",
-                fontSize: isMobile ? 'clamp(2rem, 8vw, 3rem)' : 'clamp(2.5rem, 5vw, 4.2rem)',
+                fontSize: isMobile ? '1.8rem' : '2.8rem',
                 fontWeight: 900,
-                lineHeight: 1.1,
                 color: '#FFFFFF',
-                textShadow: '0 10px 30px rgba(0,0,0,0.8)'
+                letterSpacing: '-0.02em',
+                textShadow: '0 4px 20px rgba(0,0,0,0.85)'
               }}
             >
-              Crafting Digital<br />
-              <span style={{ color: '#BCAC93', textShadow: '0 0 25px rgba(188,172,147,0.6)' }}>
-                Masterpieces.
+              <span>
+                <InteractiveTitle text="SRINIVASAN. S" />
               </span>
             </h1>
             <p style={{ marginTop: '0.5rem', color: '#E0E0E0', fontSize: isMobile ? '0.95rem' : '1.05rem', lineHeight: 1.6 }}>
@@ -523,6 +592,7 @@ export default function HeroSequence({ heroImages, mobileImages }) {
 
       {/* SEAMLESS TV MORPH TRANSITION INTO ABOUT SECTION */}
       <div
+        ref={morphRef}
         style={{
           position: 'absolute',
           top: 0,
@@ -530,10 +600,9 @@ export default function HeroSequence({ heroImages, mobileImages }) {
           width: '100%',
           height: '100%',
           backgroundColor: '#08080A',
-          opacity: morphOpacity,
+          opacity: 0,
           pointerEvents: 'none',
-          zIndex: 40,
-          transition: 'opacity 0.05s linear'
+          zIndex: 40
         }}
       />
 
@@ -543,57 +612,43 @@ export default function HeroSequence({ heroImages, mobileImages }) {
         transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
         style={{
           position: 'absolute',
-          bottom: '30px',
+          bottom: '2.5rem',
           left: '50%',
           transform: 'translateX(-50%)',
+          zIndex: 30,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '8px',
-          color: 'rgba(255, 255, 255, 0.75)',
-          fontSize: '0.8rem',
+          gap: '6px',
+          color: '#BCAC93',
           fontFamily: "'Fira Code', monospace",
-          zIndex: 10,
-          pointerEvents: 'none',
-          opacity: scrollProgress > 0.8 ? 0 : 1,
-          transition: 'opacity 0.3s ease'
+          fontSize: '0.8rem',
+          letterSpacing: '0.1em',
+          pointerEvents: 'none'
         }}
       >
-        <span>SCROLL TO ADVANCE MOVIE</span>
-        <ChevronDown size={22} color="#BCAC93" />
+        <span>SCROLL DOWN</span>
+        <ChevronDown size={18} color="#BCAC93" />
       </motion.div>
 
+      {/* Retro OLED CSS Styles */}
       <style>{`
         @keyframes tvOledPowerOn {
-          0% {
-            opacity: 0;
-            transform: rotateY(10deg) rotateX(-1.5deg) skewY(-1deg) scale(0.96);
-            filter: brightness(0.2);
-          }
-          40% {
-            opacity: 0.85;
-            filter: brightness(1.5);
-          }
-          100% {
-            opacity: 1;
-            transform: rotateY(10deg) rotateX(-1.5deg) skewY(-1deg) scale(1);
-            filter: brightness(1);
-          }
+          0% { opacity: 0; filter: brightness(3); }
+          50% { opacity: 0.8; filter: brightness(1.8); }
+          100% { opacity: 1; filter: brightness(1); }
         }
-
         @keyframes subtleFlicker {
-          0% { opacity: 0.98; }
-          50% { opacity: 1; }
-          100% { opacity: 0.97; }
+          0% { opacity: 0.97; }
+          100% { opacity: 1; }
         }
-
         .oled-cursor {
-          animation: oledBlink 0.75s infinite;
-          margin-left: 2px;
+          display: inline-block;
           color: #BCAC93;
-          font-weight: bold;
+          animation: oledBlink 0.7s step-start infinite;
+          margin-left: 2px;
+          text-shadow: 0 0 8px rgba(188, 172, 147, 0.8);
         }
-
         @keyframes oledBlink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
